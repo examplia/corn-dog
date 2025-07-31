@@ -5,11 +5,11 @@
   <title>Corn Dog Reaper</title>
   <link rel="icon" href="🌭">
 
-  <!-- ✅ Discord Embed (Open Graph) -->
+  <!-- ✅ Discord Embed -->
   <meta property="og:title" content="Today I Will Eat Five Corn Dogs">
   <meta property="og:description" content="Join the corn dog reaper on his noble mission.">
-  <meta property="og:image" content="http://iwilleatcorndogs.today/corn-dog-reaper.gif">
-  <meta property="og:url" content="http://iwilleatcorndogs.today/">
+  <meta property="og:image" content="https://iwilleatcorndogs.today//corn-dog-reaper.gif">
+  <meta property="og:url" content="https://iwilleatcorndogs.today/">
   <meta name="twitter:card" content="summary_large_image">
 
   <style>
@@ -27,7 +27,7 @@
     }
 
     .gif {
-      max-width: 100%;
+      max-width: 90%;
       height: auto;
       border: 5px solid #ff9900;
       margin: 1rem auto;
@@ -56,7 +56,15 @@
 <body>
   <h1>Today I Will Eat Five Corn Dogs</h1>
   <img src="corn-dog-reaper.gif" class="gif" alt="Corn Dog Reaper">
-  <button onclick="countCornDogs()">🌭 I ate one!</button>
+  <button id="eatButton">🌭 I ate one!</button>
   <div id="counter">Corn Dogs Eaten: 0</div>
 
   <script>
+    let count = 0;
+    document.getElementById('eatButton').addEventListener('click', () => {
+      count++;
+      document.getElementById('counter').textContent = `Corn Dogs Eaten: ${count}`;
+    });
+  </script>
+</body>
+</html>
