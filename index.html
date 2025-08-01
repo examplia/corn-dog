@@ -70,35 +70,60 @@
         counterElem = document.getElementById("counter");
         moneyElem = document.getElementById("money");
         dpsElem = document.getElementById("dps");
+        prestigeInfoElem = document.getElementById("prestige-info");
+        comboCounterElem = document.getElementById("combo-counter");
+        critChanceElem = document.getElementById("crit-chance");
+        goldenFoundElem = document.getElementById("golden-found");
+        bossKillsElem = document.getElementById("boss-kills");
       }
       
-      if (counterElem) counterElem.textContent = `Corn Dogs Eaten: ${count}`;
-      if (moneyElem) moneyElem.textContent = `Money: $${money}`;
-      if (dpsElem) dpsElem.textContent = `DPS: ${autoClickers + passiveIncome}/s`;
+      if (counterElem) counterElem.textContent = numberFormat(count);
+      if (moneyElem) moneyElem.textContent = `$${numberFormat(money)}`;
+      if (dpsElem) dpsElem.textContent = `${numberFormat(autoClickers + passiveIncome)}/s`;
+      if (prestigeInfoElem) prestigeInfoElem.textContent = `Prestige Lv.${prestigeLevel} (x${prestigeMultiplier.toFixed(1)} bonus)`;
+      if (comboCounterElem) comboCounterElem.textContent = `x${comboCount}`;
+      if (critChanceElem) critChanceElem.textContent = `${(critChance * 100).toFixed(1)}%`;
+      if (goldenFoundElem) goldenFoundElem.textContent = goldenCornDogsFound;
+      if (bossKillsElem) bossKillsElem.textContent = bossKills;
       
       // Update shop buttons
-      const shop = document.getElementById("shop");
+      const shop = document.getElementById("upgrades");
       if (shop) {
         shop.innerHTML = `
           <div class="upgrade">
-            <button id="buy-mult">
-              <span class="upgrade-name">${UPGRADES.multiplier.name}</span>
-              <span class="upgrade-desc">Current: ${multiplier}x</span>
-              <span class="upgrade-cost">$${Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1))}</span>
+            <button id="buy-mult" ${money >= Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1)) ? '' : 'disabled'}>
+              <div class="upgrade-header">
+                <span class="upgrade-icon">💪</span>
+                <span class="upgrade-name">${UPGRADES.multiplier.name}</span>
+              </div>
+              <div class="upgrade-details">
+                <span class="upgrade-desc">Level ${multiplier} → ${multiplier + 1}</span>
+                <span class="upgrade-cost">$${numberFormat(Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1)))}</span>
+              </div>
             </button>
           </div>
           <div class="upgrade">
-            <button id="buy-auto">
-              <span class="upgrade-name">${UPGRADES.autoClicker.name}</span>
-              <span class="upgrade-desc">Current: ${autoClickers}/s</span>
-              <span class="upgrade-cost">$${Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers))}</span>
+            <button id="buy-auto" ${money >= Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers)) ? '' : 'disabled'}>
+              <div class="upgrade-header">
+                <span class="upgrade-icon">🤖</span>
+                <span class="upgrade-name">${UPGRADES.autoClicker.name}</span>
+              </div>
+              <div class="upgrade-details">
+                <span class="upgrade-desc">+${autoClickers}/s → +${autoClickers + 1}/s</span>
+                <span class="upgrade-cost">$${numberFormat(Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers)))}</span>
+              </div>
             </button>
           </div>
           <div class="upgrade">
-            <button id="buy-passive">
-              <span class="upgrade-name">${UPGRADES.passive.name}</span>
-              <span class="upgrade-desc">Current: ${passiveIncome}/s</span>
-              <span class="upgrade-cost">$${Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome))}</span>
+            <button id="buy-passive" ${money >= Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)) ? '' : 'disabled'}>
+              <div class="upgrade-header">
+                <span class="upgrade-icon">💰</span>
+                <span class="upgrade-name">${UPGRADES.passive.name}</span>
+              </div>
+              <div class="upgrade-details">
+                <span class="upgrade-desc">+${passiveIncome}/s → +${passiveIncome + 1}/s</span>
+                <span class="upgrade-cost">$${numberFormat(Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)))}</span>
+              </div>
             </button>
           </div>
         `;
@@ -111,6 +136,19 @@
         if (buyMultBtn) buyMultBtn.addEventListener("click", handleUpgrade("multiplier"));
         if (buyAutoBtn) buyAutoBtn.addEventListener("click", handleUpgrade("autoClicker"));
         if (buyPassiveBtn) buyPassiveBtn.addEventListener("click", handleUpgrade("passive"));
+      }
+
+      // Update prestige button
+      const prestigeBtn = document.getElementById('prestige-btn');
+      if (prestigeBtn) {
+        prestigeBtn.disabled = count < PRESTIGE_COST;
+        prestigeBtn.innerHTML = `
+          <div class="prestige-content">
+            <span class="prestige-icon">⭐</span>
+            <span class="prestige-text">PRESTIGE</span>
+            <span class="prestige-req">${count >= PRESTIGE_COST ? 'READY!' : `Need ${numberFormat(PRESTIGE_COST - count)} more`}</span>
+          </div>
+        `;
       }
     }
 
@@ -128,6 +166,10 @@
         passiveIncome = data.passiveIncome || 0;
         prestigeLevel = data.prestigeLevel || 0;
         prestigeMultiplier = 1 + (prestigeLevel * 0.5);
+        goldenCornDogsFound = data.goldenCornDogsFound || 0;
+        bossKills = data.bossKills || 0;
+        totalClicks = data.totalClicks || 0;
+        maxCombo = data.maxCombo || 0;
       }
       updateUI();
     }
@@ -139,11 +181,15 @@
         return;
       }
 
+      const isGolden = Math.random() < goldenCornDogChance;
       const corndog = document.createElement("div");
-      corndog.className = "corndog";
+      corndog.className = `corndog ${isGolden ? 'golden-corndog' : ''}`;
       corndog.textContent = "🌭";
-      corndog.style.top = Math.random() * (window.innerHeight - 50) + "px";
-      corndog.style.left = Math.random() * (window.innerWidth - 50) + "px";
+      
+      // Better positioning - avoid UI elements
+      const margin = 100;
+      corndog.style.top = (margin + Math.random() * (window.innerHeight - 2 * margin)) + "px";
+      corndog.style.left = (margin + Math.random() * (window.innerWidth - 2 * margin)) + "px";
       document.body.appendChild(corndog);
 
       const spawnSound = document.getElementById("spawnSound");
@@ -155,21 +201,90 @@
       }
 
       corndog.addEventListener("click", async (e) => {
-        const clickValue = multiplier * (Math.random() < 0.1 ? 2 : 1); // 10% crit chance
+        const baseValue = isGolden ? GOLDEN_CORNDOG_VALUE : multiplier;
+        const isCrit = Math.random() < critChance;
+        const clickValue = baseValue * (isCrit ? critMultiplier : 1);
+        
         count += clickValue;
         money += clickValue;
+        totalClicks++;
+        
+        if (isGolden) {
+          goldenCornDogsFound++;
+        }
+        
+        updateCombo(e.pageX, e.pageY);
         updateUI();
+        
         try {
           document.getElementById("eatSound")?.play().catch(() => {});
         } catch (e) {}
-        spawnFloatingText(e.pageX, e.pageY, clickValue === multiplier * 2 ? "CRIT!" : `+${clickValue}`);
+        
+        let displayText = `+${numberFormat(clickValue)}`;
+        if (isCrit) displayText = `CRIT! ${displayText}`;
+        if (isGolden) displayText = `✨GOLDEN! ${displayText}`;
+        
+        spawnFloatingText(e.pageX, e.pageY, displayText, isGolden ? 'golden' : isCrit ? 'crit' : 'normal');
         corndog.remove();
         await saveData();
+        checkAchievements();
       });
 
       setTimeout(() => {
         if (document.body.contains(corndog)) corndog.remove();
       }, 8000);
+    }
+
+    function spawnBoss() {
+      if (currentBoss) return; // Don't spawn if boss already exists
+      
+      const boss = BOSSES[Math.floor(Math.random() * Math.min(BOSSES.length, Math.floor(count / 10000) + 1))];
+      const bossElem = document.createElement("div");
+      bossElem.className = "boss";
+      bossElem.innerHTML = `
+        <div class="boss-name">${boss.name}</div>
+        <div class="boss-health">
+          <div class="health-bar" style="width: 100%"></div>
+        </div>
+        <div class="boss-image" style="font-size: ${boss.scale}rem;">${boss.image}</div>
+        <div class="boss-hp">${boss.health}/${boss.health} HP</div>
+      `;
+      
+      bossElem.style.left = "50%";
+      bossElem.style.top = "50%";
+      bossElem.style.transform = "translate(-50%, -50%)";
+      document.body.appendChild(bossElem);
+      
+      currentBoss = { ...boss, currentHealth: boss.health, element: bossElem };
+      
+      bossElem.addEventListener("click", async (e) => {
+        const damage = multiplier * (Math.random() < critChance ? critMultiplier : 1);
+        currentBoss.currentHealth -= damage;
+        
+        const healthPercent = (currentBoss.currentHealth / currentBoss.health) * 100;
+        const healthBar = bossElem.querySelector(".health-bar");
+        const hpDisplay = bossElem.querySelector(".boss-hp");
+        
+        healthBar.style.width = Math.max(0, healthPercent) + "%";
+        hpDisplay.textContent = `${Math.max(0, currentBoss.currentHealth)}/${currentBoss.health} HP`;
+        
+        spawnFloatingText(e.pageX, e.pageY, `-${numberFormat(damage)}`, 'damage');
+        
+        if (currentBoss.currentHealth <= 0) {
+          money += currentBoss.reward;
+          bossKills++;
+          spawnFloatingText(
+            window.innerWidth/2,
+            window.innerHeight/2,
+            `Boss Defeated! +$${numberFormat(currentBoss.reward)}!`,
+            'boss-reward'
+          );
+          bossElem.remove();
+          currentBoss = null;
+          await saveData();
+          checkAchievements();
+        }
+      });
     }
 
     function startGame() {
@@ -318,7 +433,7 @@
     }
 
       // Initialize DOM elements
-      let counterElem, moneyElem, dpsElem, buyMultBtn, buyAutoBtn;
+      let counterElem, moneyElem, dpsElem, prestigeInfoElem, comboCounterElem, critChanceElem, goldenFoundElem, bossKillsElem;
 
       // Constants - Moved outside DOMContentLoaded for global access
       const PRESTIGE_COST = 1000000;
@@ -389,15 +504,19 @@
       async function saveData() {
         const username = auth.currentUser.email.split('@')[0];
         await setDoc(doc(db, "users", userId), {
-          count,
-          money,
-          multiplier,
-          autoClickers,
-          upgradeLevel,
-          passiveIncome,
-          prestigeLevel,
-          achievements,
-          username,
+          count: count || 0,
+          money: money || 0,
+          multiplier: multiplier || 1,
+          autoClickers: autoClickers || 0,
+          upgradeLevel: upgradeLevel || 1,
+          passiveIncome: passiveIncome || 0,
+          prestigeLevel: prestigeLevel || 0,
+          achievements: achievements || {},
+          username: username || 'Unknown',
+          totalClicks: totalClicks || 0,
+          maxCombo: maxCombo || 0,
+          goldenCornDogsFound: goldenCornDogsFound || 0,
+          bossKills: bossKills || 0,
           lastUpdated: new Date().getTime()
         });
         updateLeaderboard();
@@ -405,38 +524,57 @@
       
       async function updateLeaderboard() {
         const leaderboardElem = document.getElementById("leaderboard");
-        const snapshot = await getDocs(query(
-          collection(db, "users"),
-          orderBy("count", "desc"),
-          limit(10)
-        ));
+        if (!leaderboardElem) return;
         
-        let leaderboardHTML = `
-          <h3>Top Corn Dog Eaters</h3>
-          <div class="leaderboard-entries">
-        `;
-        
-        snapshot.forEach((doc, index) => {
-          const data = doc.data();
-          const isCurrentUser = doc.id === userId;
-          leaderboardHTML += `
-            <div class="leaderboard-entry ${isCurrentUser ? 'current-user' : ''}">
-              <span class="rank">#${index + 1}</span>
-              <span class="username">${data.username}</span>
-              <span class="score">${numberFormat(data.count)} 🌭</span>
+        try {
+          const snapshot = await getDocs(query(
+            collection(db, "users"),
+            orderBy("count", "desc"),
+            limit(10)
+          ));
+          
+          let leaderboardHTML = `
+            <div class="leaderboard-header">
+              <h3>🏆 Top Corn Dog Eaters</h3>
             </div>
+            <div class="leaderboard-entries">
           `;
-        });
-        
-        leaderboardHTML += `</div>`;
-        leaderboardElem.innerHTML = leaderboardHTML;
+          
+          snapshot.forEach((doc, index) => {
+            const data = doc.data();
+            const isCurrentUser = doc.id === userId;
+            
+            // Fix NaN issues by ensuring all values are valid numbers
+            const displayCount = (data.count && !isNaN(data.count)) ? numberFormat(data.count) : '0';
+            const displayUsername = data.username || 'Unknown Player';
+            
+            leaderboardHTML += `
+              <div class="leaderboard-entry ${isCurrentUser ? 'current-user' : ''}">
+                <span class="rank">#${index + 1}</span>
+                <span class="username">${displayUsername}</span>
+                <span class="score">${displayCount} 🌭</span>
+              </div>
+            `;
+          });
+          
+          leaderboardHTML += `</div>`;
+          leaderboardElem.innerHTML = leaderboardHTML;
+        } catch (error) {
+          console.error('Error updating leaderboard:', error);
+          leaderboardElem.innerHTML = `
+            <div class="leaderboard-header">
+              <h3>🏆 Top Corn Dog Eaters</h3>
+            </div>
+            <div class="leaderboard-error">Failed to load leaderboard</div>
+          `;
+        }
       }
-
-      // updateUI function is already defined above
       
       function handleUpgrade(type) {
         return async () => {
           const upgrade = UPGRADES[type];
+          if (!upgrade) return;
+          
           let current, cost;
           
           switch(type) {
@@ -466,41 +604,39 @@
               break;
           }
           
-          if (money >= cost) {
-            updateUI();
-            await saveData();
-          }
+          updateUI();
+          await saveData();
         };
       }
 
-      function spawnFloatingText(x, y, text) {
+      function spawnFloatingText(x, y, text, type = 'normal') {
         const float = document.createElement("div");
-        float.className = "floating-text";
+        float.className = `floating-text floating-${type}`;
         float.style.left = x + "px";
         float.style.top = y + "px";
         float.textContent = text;
         document.body.appendChild(float);
-        setTimeout(() => float.remove(), 1000);
+        setTimeout(() => float.remove(), 2000);
       }
 
-      // These functions are defined earlier in the code
-
-      // Event listeners are now handled in updateUI() function
-
+      // Auto-clicker and passive income interval
       setInterval(() => {
-        if (autoClickers > 0) {
-          count += autoClickers;
-          money += autoClickers;
+        if (autoClickers > 0 || passiveIncome > 0) {
+          const earnings = autoClickers + passiveIncome;
+          count += earnings;
+          money += earnings;
           updateUI();
-          saveData();
+          if (userId) saveData();
         }
       }, 1000);
 
       function numberFormat(num) {
+        if (!num || isNaN(num)) return '0';
+        if (num >= 1e12) return (num/1e12).toFixed(1) + 'T';
         if (num >= 1e9) return (num/1e9).toFixed(1) + 'B';
         if (num >= 1e6) return (num/1e6).toFixed(1) + 'M';
         if (num >= 1e3) return (num/1e3).toFixed(1) + 'K';
-        return num.toString();
+        return Math.floor(num).toString();
       }
 
       function checkAchievements() {
@@ -535,7 +671,8 @@
         spawnFloatingText(
           window.innerWidth/2,
           window.innerHeight/2,
-          `Achievement: ${ach.name}\n+$${ach.reward}!`
+          `🏆 ${ach.name}\n+${numberFormat(ach.reward)}!`,
+          'achievement'
         );
         saveData();
       }
@@ -548,7 +685,7 @@
             maxCombo = comboCount;
           }
           if (comboCount > 1) {
-            spawnFloatingText(x, y - 30, `Combo x${comboCount}!`);
+            spawnFloatingText(x, y - 30, `Combo x${comboCount}!`, 'combo');
           }
         } else {
           comboCount = 1;
@@ -604,7 +741,8 @@
           spawnFloatingText(
             window.innerWidth/2,
             window.innerHeight/2,
-            `🌟 Prestiged! New multiplier: x${prestigeMultiplier}`
+            `🌟 Prestiged! New multiplier: x${prestigeMultiplier.toFixed(1)}`,
+            'prestige'
           );
         }
       }
@@ -627,7 +765,6 @@
         }
       }
 
-      // Functions have been moved outside DOMContentLoaded
       // Initialize DOM elements and attach event listeners
       document.addEventListener("DOMContentLoaded", () => {
         console.log('DOM Content Loaded');
@@ -678,201 +815,183 @@
       });
   </script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       margin: 0;
-      background: #000;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
       color: white;
-      font-family: Impact, Haettenschweiler, 'Arial Black', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
       overflow: hidden;
+      min-height: 100vh;
     }
+    
     h1 {
-      font-size: 3rem;
-      margin-top: 2rem;
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      margin: 1rem 0;
+      background: linear-gradient(45deg, #ffcc00, #ff9900, #ffcc00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
+      font-weight: bold;
     }
-    #counter, #money, #dps {
-      font-size: 2rem;
-      margin-top: 0.5rem;
+    
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .main-stats, .secondary-stats {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #ffcc00;
+      border-radius: 15px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(255, 204, 0, 0.2);
+    }
+    
+    .main-stats h3, .secondary-stats h3 {
+      margin-top: 0;
       color: #ffcc00;
+      font-size: 1.2rem;
     }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+    
+    .stat-label {
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+    
+    .stat-value {
+      color: #ffcc00;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    #counter {
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: #ffcc00;
+      font-weight: bold;
+    }
+    
+    #money {
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      color: #4ade80;
+      font-weight: bold;
+    }
+    
+    #dps {
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: #60a5fa;
+      font-weight: bold;
+    }
+    
     .corndog {
       position: absolute;
-      font-size: 2rem;
+      font-size: 2.5rem;
       cursor: pointer;
       user-select: none;
       z-index: 10;
-      transition: transform 0.2s ease;
+      transition: all 0.2s ease;
+      filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.5));
     }
+    
     .corndog:hover {
       transform: scale(1.3);
+      filter: drop-shadow(0 0 20px rgba(255, 204, 0, 0.8));
     }
+    
+    .golden-corndog {
+      animation: goldPulse 1s infinite;
+      filter: brightness(1.5) sepia(1) saturate(5) drop-shadow(0 0 20px gold);
+    }
+    
+    @keyframes goldPulse {
+      0% { transform: scale(1); filter: brightness(1.5) sepia(1) saturate(5) drop-shadow(0 0 20px gold); }
+      50% { transform: scale(1.1); filter: brightness(2) sepia(1) saturate(6) drop-shadow(0 0 30px gold); }
+      100% { transform: scale(1); filter: brightness(1.5) sepia(1) saturate(5) drop-shadow(0 0 20px gold); }
+    }
+    
     .floating-text {
       position: absolute;
-      font-size: 1.5rem;
-      color: #ffcc00;
-      animation: floatUp 1s ease-out forwards;
+      font-size: 1.2rem;
+      font-weight: bold;
+      animation: floatUp 2s ease-out forwards;
       pointer-events: none;
+      z-index: 100;
     }
+    
+    .floating-normal { color: #ffcc00; }
+    .floating-crit { color: #ff4444; font-size: 1.5rem; }
+    .floating-golden { color: gold; font-size: 1.8rem; }
+    .floating-damage { color: #ff6b6b; }
+    .floating-boss-reward { color: #4ade80; font-size: 2rem; }
+    .floating-achievement { color: #a855f7; font-size: 1.5rem; }
+    .floating-prestige { color: #fbbf24; font-size: 2rem; }
+    .floating-combo { color: #06b6d4; }
+    
     @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(-50px); }
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
     }
+    
     #shop {
       position: fixed;
       right: 20px;
       top: 20px;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.9);
       border: 2px solid #ffcc00;
+      border-radius: 15px;
       padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
-    }
-    .upgrade {
-      margin-bottom: 15px;
-    }
-    .upgrade button {
-      width: 100%;
-      background: linear-gradient(to bottom, #ffcc00, #ff9900);
-      border: none;
-      border-radius: 10px;
-      padding: 15px;
-      cursor: pointer;
-      transition: transform 0.2s, filter 0.2s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      font-family: Impact, sans-serif;
-    }
-    .upgrade button:hover {
-      transform: scale(1.05);
-      filter: brightness(1.2);
-    }
-    .upgrade-name {
-      font-size: 1.2rem;
-      color: #000;
-      font-weight: bold;
-    }
-    .upgrade-desc {
-      font-size: 0.9rem;
-      color: #333;
-    }
-    .upgrade-cost {
-      font-size: 1rem;
-      color: #000;
-      font-weight: bold;
-    }
-    .boss {
-      position: fixed;
-      cursor: pointer;
-      user-select: none;
-      text-align: center;
-    }
-    .boss-health {
-      width: 200px;
-      height: 20px;
-      background: #333;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    .health-bar {
-      height: 100%;
-      background: linear-gradient(to right, #ff0000, #ff4400);
-      transition: width 0.2s;
-    }
-    .boss-image {
-      font-size: 4rem;
-      margin: 10px 0;
-    }
-    .boss-name {
-      color: #ffcc00;
-      font-size: 1.5rem;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-    .login-container {
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid #ffcc00;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
-      max-width: 400px;
-      margin: 2rem auto;
-    }
-    .login-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    .login-form input {
-      padding: 10px;
-      border: 2px solid #ffcc00;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-    .login-form input::placeholder {
-      color: rgba(255, 204, 0, 0.5);
-    }
-    .login-form button {
-      background: linear-gradient(to bottom, #ffcc00, #ff9900);
-      border: none;
-      padding: 15px;
-      color: black;
-      font-weight: bold;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: Impact, sans-serif;
-      font-size: 1.2rem;
-      transition: transform 0.2s, filter 0.2s;
-    }
-    .login-form button:hover {
-      transform: scale(1.05);
-      filter: brightness(1.2);
-    }
-    #reaper {
-      max-width: 90%;
-      height: auto;
-      border: 5px solid #ff9900;
-      margin: 1rem auto;
-      box-shadow: 0 0 20px #ff9900;
-    }
-
-    .stats-container {
-      display: flex;
-      justify-content: space-around;
-      margin: 20px auto;
-      max-width: 800px;
-    }
-    
-    .main-stats, .secondary-stats {
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid #ffcc00;
-      padding: 15px;
-      border-radius: 10px;
-      min-width: 200px;
+      max-width: 350px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(255, 204, 0, 0.3);
     }
     
     .shop-tabs {
       display: flex;
-      gap: 10px;
+      gap: 5px;
       margin-bottom: 15px;
     }
     
     .tab-btn {
-      background: rgba(255, 204, 0, 0.2);
+      background: rgba(255, 204, 0, 0.1);
       border: 1px solid #ffcc00;
       color: #ffcc00;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 8px 12px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
+      font-size: 0.8rem;
+      flex: 1;
     }
     
     .tab-btn.active {
       background: #ffcc00;
       color: black;
+      font-weight: bold;
+    }
+    
+    .tab-btn:hover:not(.active) {
+      background: rgba(255, 204, 0, 0.2);
     }
     
     .shop-content {
@@ -883,18 +1002,305 @@
       display: block;
     }
     
-    .achievement {
-      background: rgba(255, 255, 255, 0.1);
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 5px;
+    .upgrade {
+      margin-bottom: 12px;
+    }
+    
+    .upgrade button {
+      width: 100%;
+      background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .upgrade button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 204, 0, 0.4);
+    }
+    
+    .upgrade button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(135deg, #666 0%, #444 100%);
+    }
+    
+    .upgrade-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .upgrade-icon {
+      font-size: 1.5rem;
+    }
+    
+    .upgrade-name {
+      font-size: 1.1rem;
+      color: #000;
+      font-weight: bold;
+      flex: 1;
+      text-align: left;
+    }
+    
+    .upgrade-details {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     
-    .achievement.unlocked {
+    .upgrade-desc {
+      font-size: 0.9rem;
+      color: #333;
+    }
+    
+    .upgrade-cost {
+      font-size: 1rem;
+      color: #000;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    
+    .boss {
+      position: fixed;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.9);
+      border: 3px solid #ff4444;
+      border-radius: 15px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(255, 68, 68, 0.5);
+      z-index: 50;
+    }
+    
+    .boss-name {
+      color: #ff4444;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+    }
+    
+    .boss-health {
+      width: 250px;
+      height: 20px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border: 2px solid #666;
+    }
+    
+    .health-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #ff0000, #ff4400);
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+    }
+    
+    .boss-image {
+      font-size: 4rem;
+      margin: 15px 0;
+      animation: bossFloat 2s ease-in-out infinite;
+    }
+    
+    @keyframes bossFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .boss-hp {
+      color: #ffcc00;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    
+    .login-container {
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #ffcc00;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 400px;
+      margin: 2rem auto;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(255, 204, 0, 0.3);
+    }
+    
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .login-form input {
+      padding: 15px;
+      border: 2px solid #ffcc00;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    
+    .login-form input:focus {
+      outline: none;
+      border-color: #ff9900;
+      box-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+    }
+    
+    .login-form input::placeholder {
+      color: rgba(255, 204, 0, 0.5);
+    }
+    
+    .login-form button {
+      background: linear-gradient(135deg, #ffcc00, #ff9900);
+      border: none;
+      padding: 15px;
+      color: black;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+    }
+    
+    .login-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+    }
+    
+    #reaper {
+      max-width: min(400px, 80vw);
+      height: auto;
+      border: 3px solid #ff9900;
+      border-radius: 15px;
+      margin: 1rem auto;
+      box-shadow: 0 0 30px rgba(255, 153, 0, 0.5);
+      display: block;
+    }
+    
+    #leaderboard {
+      position: fixed;
+      left: 20px;
+      top: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #ffcc00;
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 300px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(255, 204, 0, 0.3);
+    }
+    
+    .leaderboard-header h3 {
+      margin: 0 0 15px 0;
+      color: #ffcc00;
+      font-size: 1.2rem;
+    }
+    
+    .leaderboard-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      margin-bottom: 5px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.2s;
+    }
+    
+    .leaderboard-entry:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .leaderboard-entry.current-user {
       background: rgba(255, 204, 0, 0.2);
+      border: 1px solid #ffcc00;
+    }
+    
+    .rank {
+      font-weight: bold;
+      color: #ffcc00;
+      min-width: 30px;
+    }
+    
+    .username {
+      flex: 1;
+      text-align: left;
+      margin: 0 10px;
+      font-size: 0.9rem;
+    }
+    
+    .score {
+      font-weight: bold;
+      color: #4ade80;
+      font-size: 0.9rem;
+    }
+    
+    .leaderboard-error {
+      color: #ff6b6b;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .prestige-button {
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      border: none;
+      padding: 15px 30px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 20px;
+      transition: all 0.3s;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      backdrop-filter: blur(10px);
+    }
+    
+    .prestige-button:hover:not(:disabled) {
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
+    }
+    
+    .prestige-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(135deg, #666, #444);
+    }
+    
+    .prestige-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .prestige-icon {
+      font-size: 1.5rem;
+    }
+    
+    .prestige-text {
+      font-size: 1.2rem;
+    }
+    
+    .prestige-req {
+      font-size: 0.9rem;
+      opacity: 0.8;
     }
     
     .event-announcement {
@@ -902,69 +1308,85 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.95);
       border: 3px solid #ffcc00;
-      padding: 20px;
-      border-radius: 10px;
-      font-size: 2rem;
-      animation: pulse 2s infinite;
-      z-index: 100;
-    }
-    
-    @keyframes pulse {
-      0% { transform: translate(-50%, -50%) scale(1); }
-      50% { transform: translate(-50%, -50%) scale(1.1); }
-      100% { transform: translate(-50%, -50%) scale(1); }
-    }
-    
-    .prestige-button {
-      background: linear-gradient(to bottom, #ff00ff, #ff00aa);
-      border: none;
-      padding: 15px 30px;
-      color: white;
-      font-size: 1.2rem;
-      border-radius: 10px;
-      cursor: pointer;
-      margin: 20px;
-      transition: all 0.2s;
-    }
-    
-    .prestige-button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
-    }
-    
-    #leaderboard {
-      position: fixed;
-      left: 20px;
-      top: 20px;
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid #ffcc00;
-      padding: 20px;
       border-radius: 15px;
-      max-width: 300px;
+      padding: 30px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      animation: eventPulse 3s ease-in-out;
+      z-index: 200;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 50px rgba(255, 204, 0, 0.5);
     }
     
-    .leaderboard-entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 5px;
-      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
+    @keyframes eventPulse {
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+      10% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
     }
     
-    .leaderboard-entry.current-user {
-      background: rgba(255, 204, 0, 0.2);
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      #shop {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        left: 20px;
+        top: auto;
+        max-width: none;
+        max-height: 40vh;
+        overflow-y: auto;
+      }
+      
+      #leaderboard {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: none;
+        max-height: 30vh;
+        overflow-y: auto;
+      }
+      
+      .stats-container {
+        margin: 10px;
+        gap: 10px;
+      }
+      
+      .prestige-button {
+        bottom: 200px;
+        padding: 12px 25px;
+        font-size: 1rem;
+      }
+      
+      .corndog {
+        font-size: 2rem;
+      }
+      
+      .boss {
+        max-width: 90vw;
+      }
     }
     
-    .golden-corndog {
-      filter: brightness(1.5) sepia(1) saturate(5);
-      animation: shine 1s infinite;
-    }
-    
-    @keyframes shine {
-      0% { filter: brightness(1.5) sepia(1) saturate(5); }
-      50% { filter: brightness(2) sepia(1) saturate(6); }
-      100% { filter: brightness(1.5) sepia(1) saturate(5); }
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+        margin: 0.5rem 0;
+      }
+      
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .corndog {
+        font-size: 1.8rem;
+      }
+      
+      .floating-text {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
@@ -972,32 +1394,60 @@
   <div id="loginUI">
     <h1>Today I Will Eat Five Corn Dogs</h1>
     <div class="login-container">
-      <h2>Login or Register</h2>
+      <h2>🌭 Enter the Corn Dog Realm</h2>
       <form id="loginForm" class="login-form">
         <input type="text" id="username" placeholder="Choose a username (3+ characters)" required minlength="3">
         <input type="password" id="password" placeholder="Choose a password (6+ characters)" required minlength="6">
         <p style="color: #ffcc00; font-size: 0.9rem; margin: 0;">
-          If you're new, we'll create an account for you automatically!
+          New players get an account created automatically!
         </p>
-        <button type="submit">Play Game</button>
+        <button type="submit">🎮 Start Playing</button>
       </form>
     </div>
   </div>
 
   <div id="gameContent" style="display: none;">
     <h1>Today I Will Eat Five Corn Dogs</h1>
+    
     <div class="stats-container">
       <div class="main-stats">
-        <div id="counter">Corn Dogs Eaten: 0</div>
-        <div id="money">Money: $0</div>
-        <div id="dps">DPS: 0/s</div>
-        <div id="prestige-info">Prestige Level: 0 (x1.0 bonus)</div>
+        <h3>📊 Main Stats</h3>
+        <div class="stat-item">
+          <span class="stat-label">🌭 Corn Dogs Eaten:</span>
+          <span class="stat-value" id="counter">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">💰 Money:</span>
+          <span class="stat-value" id="money">$0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">⚡ Per Second:</span>
+          <span class="stat-value" id="dps">0/s</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">⭐ Prestige:</span>
+          <span class="stat-value" id="prestige-info">Lv.0 (x1.0)</span>
+        </div>
       </div>
+      
       <div class="secondary-stats">
-        <div id="combo-counter">Current Combo: x1</div>
-        <div id="crit-chance">Crit Chance: 10%</div>
-        <div id="golden-found">Golden Corn Dogs: 0</div>
-        <div id="boss-kills">Boss Kills: 0</div>
+        <h3>🎯 Performance</h3>
+        <div class="stat-item">
+          <span class="stat-label">🔥 Current Combo:</span>
+          <span class="stat-value" id="combo-counter">x1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">💢 Crit Chance:</span>
+          <span class="stat-value" id="crit-chance">10%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">✨ Golden Found:</span>
+          <span class="stat-value" id="golden-found">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">👹 Boss Kills:</span>
+          <span class="stat-value" id="boss-kills">0</span>
+        </div>
       </div>
     </div>
     
@@ -1005,15 +1455,17 @@
     
     <div id="shop">
       <div class="shop-tabs">
-        <button class="tab-btn active" data-tab="upgrades">Upgrades</button>
-        <button class="tab-btn" data-tab="achievements">Achievements</button>
-        <button class="tab-btn" data-tab="stats">Statistics</button>
+        <button class="tab-btn active" data-tab="upgrades">🛒 Shop</button>
+        <button class="tab-btn" data-tab="achievements">🏆 Awards</button>
+        <button class="tab-btn" data-tab="stats">📈 Stats</button>
       </div>
       <div class="shop-content active" id="upgrades">
         <!-- Filled by updateUI() -->
       </div>
       <div class="shop-content" id="achievements">
-        <!-- Filled by updateAchievements() -->
+        <div style="color: #ffcc00; text-align: center; padding: 20px;">
+          🏆 Achievements coming soon!
+        </div>
       </div>
       <div class="shop-content" id="stats">
         <div class="stat-entry">Time Played: <span id="time-played">0:00</span></div>
@@ -1026,7 +1478,11 @@
     <div id="leaderboard"></div>
 
     <button id="prestige-btn" class="prestige-button">
-      Prestige (Requires 1M Corn Dogs)
+      <div class="prestige-content">
+        <span class="prestige-icon">⭐</span>
+        <span class="prestige-text">PRESTIGE</span>
+        <span class="prestige-req">Need 1M Corn Dogs</span>
+      </div>
     </button>
   </div>
 
