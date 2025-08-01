@@ -101,9 +101,10 @@
       submitBtn.disabled = true;
 
       try {
-        console.log('Attempting to sign in with:', username + '@corndogs.game');
+        const email = `${username.trim()}@corndogs.game`;
+        console.log('Attempting to sign in with:', email);
         // First try to sign in
-        await signInWithEmailAndPassword(auth, username + '@corndogs.game', password);
+        await signInWithEmailAndPassword(auth, email, password);
         console.log('Login successful!');
       } catch (error) {
         console.log('Login attempt error:', error.code, error.message);
@@ -161,8 +162,14 @@
 
       document.addEventListener("DOMContentLoaded", () => {
       // Setup login form handler
-      document.getElementById('loginForm').addEventListener('submit', handleLogin);
-      document.getElementById('prestige-btn').addEventListener('click', handlePrestige);
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+      }
+      const prestigeBtn = document.getElementById('prestige-btn');
+      if (prestigeBtn) {
+        prestigeBtn.addEventListener('click', handlePrestige);
+      }
       const counterElem = document.getElementById("counter");
       const moneyElem = document.getElementById("money");
       const dpsElem = document.getElementById("dps");
