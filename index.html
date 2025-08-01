@@ -143,7 +143,7 @@
       let currentBoss = null;
       let upgradeLevel = 1;
       let passiveIncome = 0;
-      let prestige = 0;
+      let prestigeLevel = 0;
       let prestigeMultiplier = 1;
       let critChance = 0.1;
       let critMultiplier = 2;
@@ -217,6 +217,8 @@
           autoClickers = data.autoClickers || 0;
           upgradeLevel = data.upgradeLevel || 1;
           passiveIncome = data.passiveIncome || 0;
+          prestigeLevel = data.prestigeLevel || 0;
+          prestigeMultiplier = 1 + (prestigeLevel * 0.5);
         }
         updateUI();
       }
@@ -230,7 +232,7 @@
           autoClickers,
           upgradeLevel,
           passiveIncome,
-          prestige,
+          prestigeLevel,
           achievements,
           username,
           lastUpdated: new Date().getTime()
@@ -551,10 +553,10 @@
         }, event.duration);
       }
 
-      function prestige() {
+      function handlePrestige() {
         if (count >= PRESTIGE_COST) {
-          prestige++;
-          prestigeMultiplier = 1 + (prestige * 0.5);
+          prestigeLevel++;
+          prestigeMultiplier = 1 + (prestigeLevel * 0.5);
           count = 0;
           money = 0;
           multiplier = 1;
@@ -925,7 +927,7 @@
 
     <div id="leaderboard"></div>
 
-    <button id="prestige-btn" class="prestige-button" onclick="prestige()">
+    <button id="prestige-btn" class="prestige-button" onclick="handlePrestige()">
       Prestige (Requires 1M Corn Dogs)
     </button>
   </div>
