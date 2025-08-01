@@ -140,10 +140,9 @@
         }
       }, 1000);
 
-      (async () => {
-        await loadData();
+      loadData().then(() => {
         setInterval(spawnCornDog, 1200);
-      })();
+      });
     });
   </script>
   <style>
