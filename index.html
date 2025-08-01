@@ -13,7 +13,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyChqD_9j3np8jnrM4BXDnhrRl4r52TamZk",
@@ -80,9 +80,19 @@
 
     async function handleLogin(e) {
       e.preventDefault();
-      const username = document.getElementById('username').value;
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       
+      if (username.length < 3) {
+        alert('Username must be at least 3 characters long');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+      }
+
       // Show loading state
       const submitBtn = document.querySelector('#loginForm button');
       const originalText = submitBtn.textContent;
@@ -90,48 +100,52 @@
       submitBtn.disabled = true;
 
       try {
+        // First try to sign in
         await signInWithEmailAndPassword(auth, username + '@corndogs.game', password);
       } catch (error) {
-        console.log('Login error:', error.code); // For debugging
-        if (error.code === 'auth/user-not-found') {
-          // If user doesn't exist, create a new account
+        console.log('Login attempt:', error.code);
+        
+        // If user doesn't exist or credentials invalid, try to register
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
           try {
+            console.log('Attempting to create new account');
             await createUserWithEmailAndPassword(auth, username + '@corndogs.game', password);
+            console.log('Account created successfully');
           } catch (createError) {
-            console.log('Create account error:', createError.code); // For debugging
-            let errorMessage = 'Error creating account: ';
+            console.log('Registration error:', createError.code);
+            let errorMessage = '';
             switch(createError.code) {
               case 'auth/email-already-in-use':
-                errorMessage += 'Username already taken';
+                errorMessage = 'This username is already taken. Try a different one or check your password if this is your account.';
                 break;
               case 'auth/invalid-email':
-                errorMessage += 'Invalid username';
+                errorMessage = 'Invalid username. Use only letters, numbers, and common symbols.';
                 break;
               case 'auth/operation-not-allowed':
-                errorMessage += 'Email/Password sign up is not enabled. Please contact the developer.';
+                errorMessage = 'Registration is currently disabled. Please try again later.';
                 break;
               case 'auth/weak-password':
-                errorMessage += 'Password should be at least 6 characters';
+                errorMessage = 'Password must be at least 6 characters long';
                 break;
               default:
-                errorMessage += createError.message;
+                errorMessage = 'Error creating account. Please try again.';
             }
             alert(errorMessage);
           }
         } else {
-          let errorMessage = 'Error logging in: ';
+          let errorMessage = '';
           switch(error.code) {
             case 'auth/wrong-password':
-              errorMessage += 'Invalid password';
+              errorMessage = 'Incorrect password';
               break;
-            case 'auth/invalid-email':
-              errorMessage += 'Invalid username';
+            case 'auth/invalid-credential':
+              errorMessage = 'Invalid username or password';
               break;
-            case 'auth/configuration-not-found':
-              errorMessage += 'Authentication not set up. Please enable Email/Password authentication in Firebase Console.';
+            case 'auth/too-many-requests':
+              errorMessage = 'Too many attempts. Please try again later.';
               break;
             default:
-              errorMessage += error.message;
+              errorMessage = 'Error logging in. Please try again.';
           }
           alert(errorMessage);
         }
@@ -936,8 +950,11 @@
     <div class="login-container">
       <h2>Login or Register</h2>
       <form id="loginForm" class="login-form">
-        <input type="text" id="username" placeholder="Username" required>
-        <input type="password" id="password" placeholder="Password" required>
+        <input type="text" id="username" placeholder="Choose a username (3+ characters)" required minlength="3">
+        <input type="password" id="password" placeholder="Choose a password (6+ characters)" required minlength="6">
+        <p style="color: #ffcc00; font-size: 0.9rem; margin: 0;">
+          If you're new, we'll create an account for you automatically!
+        </p>
         <button type="submit">Play Game</button>
       </form>
     </div>
