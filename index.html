@@ -432,41 +432,7 @@
         leaderboardElem.innerHTML = leaderboardHTML;
       }
 
-      function updateUI() {
-        counterElem.textContent = `Corn Dogs Eaten: ${count}`;
-        moneyElem.textContent = `Money: $${money}`;
-        dpsElem.textContent = `DPS: ${autoClickers + passiveIncome}/s`;
-        
-        // Update shop buttons
-        document.getElementById("shop").innerHTML = `
-          <div class="upgrade">
-            <button id="buy-mult">
-              <span class="upgrade-name">${UPGRADES.multiplier.name}</span>
-              <span class="upgrade-desc">Current: ${multiplier}x</span>
-              <span class="upgrade-cost">$${Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1))}</span>
-            </button>
-          </div>
-          <div class="upgrade">
-            <button id="buy-auto">
-              <span class="upgrade-name">${UPGRADES.autoClicker.name}</span>
-              <span class="upgrade-desc">Current: ${autoClickers}/s</span>
-              <span class="upgrade-cost">$${Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers))}</span>
-            </button>
-          </div>
-          <div class="upgrade">
-            <button id="buy-passive">
-              <span class="upgrade-name">${UPGRADES.passive.name}</span>
-              <span class="upgrade-desc">Current: ${passiveIncome}/s</span>
-              <span class="upgrade-cost">$${Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome))}</span>
-            </button>
-          </div>
-        `;
-        
-        // Reattach event listeners
-        document.getElementById("buy-mult").addEventListener("click", handleUpgrade("multiplier"));
-        document.getElementById("buy-auto").addEventListener("click", handleUpgrade("autoClicker"));
-        document.getElementById("buy-passive").addEventListener("click", handleUpgrade("passive"));
-      }
+      // updateUI function is already defined above
       
       function handleUpgrade(type) {
         return async () => {
