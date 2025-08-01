@@ -1,197 +1,9 @@
-.achievement-notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      border: 2px solid #ffcc00;
-      border-radius: 12px;
-      padding: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 1000;
-      animation: achievementSlide 4s ease-in-out forwards;
-      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.4);
-      max-width: 300px;
-    }
-    
-    @keyframes achievementSlide {
-      0% { transform: translateX(100%); opacity: 0; }
-      10% { transform: translateX(0); opacity: 1; }
-      90% { transform: translateX(0); opacity: 1; }
-      100% { transform: translateX(100%); opacity: 0; }
-    }
-    
-    .achievement-icon {
-      font-size: 2rem;
-      color: #000;
-    }
-    
-    .achievement-content {
-      flex: 1;
-      color: #000;
-    }
-    
-    .achievement-title {
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
-    
-    .achievement-reward {
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-    
-    .achievements-list {
-      max-height: 400px;
-      overflow-y: auto;
-      padding-right: 10px;
-    }
-    
-    .achievement-category {
-      margin-bottom: 20px;
-    }
-    
-    .achievement-category h4 {
-      color: #ffcc00;
-      margin: 0 0 10px 0;
-      font-size: 1rem;
-      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
-      padding-bottom: 5px;
-    }
-    
-    .achievement {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 8px;
-      transition: all 0.2s;
-    }
-    
-    .achievement:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .achievement.unlocked {
-      background: rgba(255, 204, 0, 0.15);
-      border-color: rgba(255, 204, 0, 0.3);
-    }
-    
-    .achievement-info {
-      margin-bottom: 8px;
-    }
-    
-    .achievement-name {
-      font-weight: bold;
-      color: #fff;
-      font-size: 0.9rem;
-      margin-bottom: 2px;
-    }
-    
-    .achievement.unlocked .achievement-name {
-      color: #ffcc00;
-    }
-    
-    .achievement-notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      border: 2px solid #ffcc00;
-      border-radius: 12px;
-      padding: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 1000;
-      animation: achievementSlide 4s ease-in-out forwards;
-      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.4);
-      max-width: 300px;
-    }
-    
-    @keyframes achievementSlide {
-      0% { transform: translateX(100%); opacity: 0; }
-      10% { transform: translateX(0); opacity: 1; }
-      90% { transform: translateX(0); opacity: 1; }
-      100% { transform: translateX(100%); opacity: 0; }
-    }
-    
-    .achievement-icon {
-      font-size: 2rem;
-      color: #000;
-    }
-    
-    .achievement-content {
-      flex: 1;
-      color: #000;
-    }
-    
-    .achievement-title {
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
-    
-    .achievement-reward {
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-    
-    .achievements-list {
-      max-height: 400px;
-      overflow-y: auto;
-      padding-right: 10px;
-    }
-    
-    .achievement-category {
-      margin-bottom: 20px;
-    }
-    
-    .achievement-category h4 {
-      color: #ffcc00;
-      margin: 0 0 10px 0;
-      font-size: 1rem;
-      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
-      padding-bottom: 5px;
-    }
-    
-    .achievement {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 8px;
-      transition: all 0.2s;
-    }
-    
-    .achievement:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .achievement.unlocked {
-      background: rgba(255, 204, 0, 0.15);
-      border-color: rgba(255, 204, 0, 0.3);
-    }
-    
-    .achievement-info {
-      margin-bottom: 8px;
-    }
-    
-    .achievement-name {
-      font-weight: bold;
-      color: #fff;
-      font-size: 0.9rem;
-      margin-bottom: 2px;
-    }
-    
-    .achievement.unlocked .achievement-name {
-      color: #ffcc00;
-    }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Corn Dog Clicker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <link rel="icon" href="🌭">
   <meta property="og:title" content="Today I Will Eat Five Corn Dogs">
   <meta property="og:description" content="Join the corn dog reaper on his noble mission.">
@@ -200,7 +12,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -235,7 +47,9 @@
       });
 
     let userId = null;
+    let username = null;
     let gameStarted = false;
+    let chatListener = null;
 
     // Login system
     function showLoginUI() {
@@ -250,6 +64,61 @@
       const loginUI = document.getElementById('loginUI');
       if (gameContent) gameContent.style.display = 'block';
       if (loginUI) loginUI.style.display = 'none';
+    }
+
+    // Chat functions
+    async function sendChatMessage(message) {
+      if (!userId || !username || !message.trim()) return;
+      
+      try {
+        await addDoc(collection(db, "chat"), {
+          userId: userId,
+          username: username,
+          message: message.trim().substring(0, 200), // Limit message length
+          timestamp: serverTimestamp(),
+          cornDogs: count // Show user's corn dog count
+        });
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
+
+    function startChatListener() {
+      const messagesContainer = document.getElementById('chat-messages');
+      if (!messagesContainer) return;
+      
+      // Clean up existing listener
+      if (chatListener) {
+        chatListener();
+      }
+      
+      // Start new listener
+      const q = query(
+        collection(db, "chat"),
+        orderBy("timestamp", "desc"),
+        limit(50)
+      );
+      
+      chatListener = onSnapshot(q, (snapshot) => {
+        const messages = [];
+        snapshot.forEach((doc) => {
+          messages.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Reverse to show newest at bottom
+        messages.reverse();
+        
+        messagesContainer.innerHTML = messages.map(msg => `
+          <div class="chat-message ${msg.userId === userId ? 'own-message' : ''}">
+            <span class="chat-username">${msg.username || 'Anonymous'}</span>
+            <span class="chat-count">${numberFormat(msg.cornDogs || 0)} 🌭</span>
+            <div class="chat-text">${msg.message}</div>
+          </div>
+        `).join('');
+        
+        // Auto-scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      });
     }
 
     // Game functions
@@ -310,30 +179,11 @@
               </div>
               <div class="upgrade-details">
                 <span class="upgrade-desc">+${passiveIncome}/s → +${passiveIncome + 1}/s</span>
-                <span class="upgrade-cost">${numberFormat(Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)))}</span>
+                <span class="upgrade-cost">$${numberFormat(Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)))}</span>
               </div>
             </button>
           </div>
-          
-          <div class="auto-upgrade-section">
-            <button class="auto-upgrade-toggle ${autoUpgradeEnabled ? 'active' : ''}" onclick="toggleAutoUpgrade()">
-              🤖 Auto-Upgrade: ${autoUpgradeEnabled ? 'ON' : 'OFF'}
-            </button>
-          </div>
-          
-          ${activePowerUps.length > 0 ? `
-          <div class="active-powerups">
-            <h4>🔥 Active Power-ups</h4>
-            ${activePowerUps.map(p => {
-              const timeLeft = Math.max(0, Math.ceil((p.endTime - Date.now()) / 1000));
-              return `<div class="powerup-status">${p.icon} ${p.effect} (${timeLeft}s)</div>`;
-            }).join('')}
-          </div>
-          ` : ''}
         `;
-        
-        // Make sure toggleAutoUpgrade is available globally
-        window.toggleAutoUpgrade = toggleAutoUpgrade;
         
         // Reattach event listeners
         const buyMultBtn = document.getElementById("buy-mult");
@@ -377,6 +227,7 @@
         bossKills = data.bossKills || 0;
         totalClicks = data.totalClicks || 0;
         maxCombo = data.maxCombo || 0;
+        username = data.username || auth.currentUser?.email?.split('@')[0] || 'Unknown';
       }
       updateUI();
     }
@@ -395,8 +246,16 @@
       
       // Better positioning - avoid UI elements
       const margin = 100;
-      corndog.style.top = (margin + Math.random() * (window.innerHeight - 2 * margin)) + "px";
-      corndog.style.left = (margin + Math.random() * (window.innerWidth - 2 * margin)) + "px";
+      const gameArea = document.getElementById('game-area');
+      const bounds = gameArea ? gameArea.getBoundingClientRect() : { 
+        left: 0, 
+        top: 100, 
+        width: window.innerWidth, 
+        height: window.innerHeight - 200 
+      };
+      
+      corndog.style.top = (bounds.top + Math.random() * (bounds.height - 100)) + "px";
+      corndog.style.left = (bounds.left + Math.random() * (bounds.width - 100)) + "px";
       document.body.appendChild(corndog);
 
       const spawnSound = document.getElementById("spawnSound");
@@ -407,7 +266,13 @@
         } catch (e) {}
       }
 
-      corndog.addEventListener("click", async (e) => {
+      corndog.addEventListener("click", handleCornDogClick);
+      corndog.addEventListener("touchstart", handleCornDogClick);
+
+      async function handleCornDogClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         const baseValue = isGolden ? GOLDEN_CORNDOG_VALUE : multiplier;
         const isCrit = Math.random() < critChance;
         const clickValue = baseValue * (isCrit ? critMultiplier : 1);
@@ -420,7 +285,7 @@
           goldenCornDogsFound++;
         }
         
-        updateCombo(e.pageX, e.pageY);
+        updateCombo(e.pageX || e.touches?.[0]?.pageX, e.pageY || e.touches?.[0]?.pageY);
         updateUI();
         
         try {
@@ -431,11 +296,16 @@
         if (isCrit) displayText = `CRIT! ${displayText}`;
         if (isGolden) displayText = `✨GOLDEN! ${displayText}`;
         
-        spawnFloatingText(e.pageX, e.pageY, displayText, isGolden ? 'golden' : isCrit ? 'crit' : 'normal');
+        spawnFloatingText(
+          e.pageX || e.touches?.[0]?.pageX, 
+          e.pageY || e.touches?.[0]?.pageY, 
+          displayText, 
+          isGolden ? 'golden' : isCrit ? 'crit' : 'normal'
+        );
         corndog.remove();
         await saveData();
         checkAchievements();
-      });
+      }
 
       setTimeout(() => {
         if (document.body.contains(corndog)) corndog.remove();
@@ -464,7 +334,13 @@
       
       currentBoss = { ...boss, currentHealth: boss.health, element: bossElem };
       
-      bossElem.addEventListener("click", async (e) => {
+      bossElem.addEventListener("click", handleBossClick);
+      bossElem.addEventListener("touchstart", handleBossClick);
+
+      async function handleBossClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         const damage = multiplier * (Math.random() < critChance ? critMultiplier : 1);
         currentBoss.currentHealth -= damage;
         
@@ -475,7 +351,12 @@
         healthBar.style.width = Math.max(0, healthPercent) + "%";
         hpDisplay.textContent = `${Math.max(0, currentBoss.currentHealth)}/${currentBoss.health} HP`;
         
-        spawnFloatingText(e.pageX, e.pageY, `-${numberFormat(damage)}`, 'damage');
+        spawnFloatingText(
+          e.pageX || e.touches?.[0]?.pageX, 
+          e.pageY || e.touches?.[0]?.pageY, 
+          `-${numberFormat(damage)}`, 
+          'damage'
+        );
         
         if (currentBoss.currentHealth <= 0) {
           money += currentBoss.reward;
@@ -491,7 +372,7 @@
           await saveData();
           checkAchievements();
         }
-      });
+      }
     }
 
     function startGame() {
@@ -508,6 +389,9 @@
           timePlayedSeconds++; 
           checkDailyChallenges();
         }, 1000);
+        
+        // Start chat listener
+        startChatListener();
       }).catch(error => {
         console.error('Error starting game:', error);
       });
@@ -557,30 +441,13 @@
     let spawnInterval;
     let dailyProgress = {};
     let lastDailyReset = 0;
-    let autoUpgradeEnabled = false;
-    let clickMultiplierChain = 1;
-    let powerUps = [];
-    let lastPowerUpSpawn = 0;
-
-    // New game mechanics
-    const POWER_UPS = [
-      { type: 'speed', icon: '⚡', duration: 10000, effect: 'Double click speed', multiplier: 2 },
-      { type: 'money', icon: '💰', duration: 15000, effect: 'Triple money gain', multiplier: 3 },
-      { type: 'crit', icon: '💢', duration: 12000, effect: '50% crit chance', critBonus: 0.5 },
-      { type: 'magnet', icon: '🧲', duration: 20000, effect: 'Auto-collect corn dogs', autoCollect: true },
-      { type: 'freeze', icon: '❄️', duration: 8000, effect: 'Freeze time (longer spawns)', timeFreeze: true }
-    ];
-
-    let activePowerUps = [];
-    let multiplierChainCount = 0;
-    let lastMultiplierTime = 0;
 
     async function handleLogin(e) {
       e.preventDefault();
-      const username = document.getElementById('username').value.trim();
+      const usernameInput = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       
-      if (username.length < 3) {
+      if (usernameInput.length < 3) {
         alert('Username must be at least 3 characters long');
         return;
       }
@@ -597,7 +464,8 @@
       submitBtn.disabled = true;
 
       try {
-        const email = `${username.trim()}@corndogs.game`;
+        const email = `${usernameInput.trim()}@corndogs.game`;
+        username = usernameInput; // Store username
         console.log('Attempting to sign in with:', email);
         // First try to sign in
         await signInWithEmailAndPassword(auth, email, password);
@@ -609,7 +477,7 @@
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
           try {
             console.log('Attempting to create new account');
-            await createUserWithEmailAndPassword(auth, username + '@corndogs.game', password);
+            await createUserWithEmailAndPassword(auth, email, password);
             console.log('Account created successfully');
           } catch (createError) {
             console.log('Registration error:', createError.code);
@@ -738,7 +606,6 @@
       async function saveData() {
         if (!userId) return;
         
-        const username = auth.currentUser?.email?.split('@')[0] || 'Unknown';
         const dataToSave = {
           count: Math.floor(count) || 0,
           money: Math.floor(money) || 0,
@@ -748,7 +615,7 @@
           passiveIncome: Math.floor(passiveIncome) || 0,
           prestigeLevel: Math.floor(prestigeLevel) || 0,
           achievements: achievements || {},
-          username: username,
+          username: username || auth.currentUser?.email?.split('@')[0] || 'Unknown',
           totalClicks: Math.floor(totalClicks) || 0,
           maxCombo: Math.floor(maxCombo) || 0,
           goldenCornDogsFound: Math.floor(goldenCornDogsFound) || 0,
@@ -880,33 +747,14 @@
         setTimeout(() => float.remove(), 2000);
       }
 
-      // Auto-clicker and passive income interval with stats tracking
+      // Auto-clicker and passive income interval
       setInterval(() => {
-        timePlayedSeconds++;
-        
         if (autoClickers > 0 || passiveIncome > 0) {
-          let earnings = autoClickers + passiveIncome;
-          
-          // Apply power-up multipliers to auto earnings
-          activePowerUps.forEach(powerUp => {
-            if (powerUp.type === 'money') earnings *= powerUp.multiplier;
-            if (powerUp.type === 'speed') earnings *= powerUp.multiplier;
-          });
-          
+          const earnings = autoClickers + passiveIncome;
           count += earnings;
           money += earnings;
           updateUI();
           if (userId) saveData();
-        }
-        
-        // Update power-ups display every second
-        if (activePowerUps.length > 0) {
-          updateUI();
-        }
-        
-        // Check achievements periodically
-        if (timePlayedSeconds % 5 === 0) {
-          checkAchievements();
         }
       }, 1000);
 
@@ -1062,110 +910,6 @@
         { id: 'perfect', name: 'Perfect Run', desc: 'Play for 10 minutes without missing a corn dog', reward: 30000 }
       ];
 
-      // Power-up system
-      function spawnPowerUp() {
-        const powerUp = POWER_UPS[Math.floor(Math.random() * POWER_UPS.length)];
-        const powerUpElem = document.createElement("div");
-        powerUpElem.className = "power-up";
-        powerUpElem.textContent = powerUp.icon;
-        powerUpElem.title = powerUp.effect;
-        
-        const margin = 150;
-        powerUpElem.style.top = (margin + Math.random() * (window.innerHeight - 2 * margin)) + "px";
-        powerUpElem.style.left = (margin + Math.random() * (window.innerWidth - 2 * margin)) + "px";
-        document.body.appendChild(powerUpElem);
-        
-        powerUpElem.addEventListener("click", () => {
-          activatePowerUp(powerUp);
-          powerUpElem.remove();
-        });
-        
-        setTimeout(() => {
-          if (document.body.contains(powerUpElem)) powerUpElem.remove();
-        }, 15000);
-      }
-
-      function activatePowerUp(powerUp) {
-        // Remove existing power-up of same type
-        activePowerUps = activePowerUps.filter(p => p.type !== powerUp.type);
-        
-        const activePowerUp = {
-          ...powerUp,
-          startTime: Date.now(),
-          endTime: Date.now() + powerUp.duration
-        };
-        
-        activePowerUps.push(activePowerUp);
-        
-        // Show power-up notification
-        spawnFloatingText(
-          window.innerWidth / 2,
-          window.innerHeight / 3,
-          `${powerUp.icon} ${powerUp.effect}!`,
-          'powerup'
-        );
-        
-        // Set timeout to remove power-up
-        setTimeout(() => {
-          activePowerUps = activePowerUps.filter(p => p !== activePowerUp);
-          updateUI();
-        }, powerUp.duration);
-        
-        updateUI();
-      }
-
-      function hasActivePowerUp(type) {
-        return activePowerUps.some(p => p.type === type);
-      }
-
-      function getActiveCritBonus() {
-        const critPowerUp = activePowerUps.find(p => p.type === 'crit');
-        return critPowerUp ? critPowerUp.critBonus : 0;
-      }
-
-      // Multiplier chain system
-      function updateMultiplierChain() {
-        const now = Date.now();
-        if (now - lastMultiplierTime < 1000) { // Within 1 second
-          multiplierChainCount++;
-          clickMultiplierChain = Math.min(multiplierChainCount, 10); // Cap at 10x
-          
-          if (clickMultiplierChain >= 5) {
-            showMultiplierChain();
-          }
-        } else {
-          multiplierChainCount = 1;
-          clickMultiplierChain = 1;
-        }
-        lastMultiplierTime = now;
-      }
-
-      function showMultiplierChain() {
-        const chainElem = document.createElement("div");
-        chainElem.className = "multiplier-chain";
-        chainElem.textContent = `${clickMultiplierChain}x CHAIN!`;
-        document.body.appendChild(chainElem);
-        
-        setTimeout(() => {
-          if (document.body.contains(chainElem)) chainElem.remove();
-        }, 1000);
-      }
-
-      // Auto-upgrade system
-      function checkAutoUpgrades() {
-        // Auto-buy cheapest affordable upgrade
-        const upgrades = [
-          { type: 'multiplier', cost: Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1)) },
-          { type: 'autoClicker', cost: Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers)) },
-          { type: 'passive', cost: Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)) }
-        ].filter(u => money >= u.cost).sort((a, b) => a.cost - b.cost);
-        
-        if (upgrades.length > 0) {
-          const upgrade = upgrades[0];
-          handleUpgrade(upgrade.type)();
-        }
-      }
-
       function checkDailyChallenges() {
         const now = new Date();
         if (now.getTime() - lastDailyReset > 24 * 60 * 60 * 1000) {
@@ -1227,33 +971,56 @@
         setupPanelToggle('toggle-shop', 'shop');
         setupPanelToggle('toggle-leaderboard', 'leaderboard');
         setupPanelToggle('toggle-stats', 'stats-container');
+        setupPanelToggle('toggle-chat', 'chat-container');
 
         // Setup master hide/show button
         const masterToggle = document.getElementById('master-toggle');
         if (masterToggle) {
           masterToggle.addEventListener('click', () => {
-            const panels = ['shop', 'leaderboard', 'stats-container'];
-            const allHidden = panels.every(id => document.getElementById(id).classList.contains('panel-hidden'));
+            const panels = ['shop', 'leaderboard', 'stats-container', 'chat-container'];
+            const allHidden = panels.every(id => {
+              const panel = document.getElementById(id);
+              return panel && panel.classList.contains('panel-hidden');
+            });
             
             panels.forEach(id => {
               const panel = document.getElementById(id);
-              const toggle = document.getElementById(`toggle-${id.replace('-container', '-stats')}`);
-              if (allHidden) {
-                panel.classList.remove('panel-hidden');
-                if (toggle) {
-                  toggle.innerHTML = '❌';
-                  toggle.title = `Hide ${id}`;
-                }
-              } else {
-                panel.classList.add('panel-hidden');
-                if (toggle) {
-                  toggle.innerHTML = '👁️';
-                  toggle.title = `Show ${id}`;
+              const toggleId = id === 'stats-container' ? 'toggle-stats' : 
+                              id === 'chat-container' ? 'toggle-chat' : 
+                              `toggle-${id}`;
+              const toggle = document.getElementById(toggleId);
+              if (panel) {
+                if (allHidden) {
+                  panel.classList.remove('panel-hidden');
+                  if (toggle) {
+                    toggle.innerHTML = '❌';
+                    toggle.title = `Hide ${id}`;
+                  }
+                } else {
+                  panel.classList.add('panel-hidden');
+                  if (toggle) {
+                    toggle.innerHTML = '👁️';
+                    toggle.title = `Show ${id}`;
+                  }
                 }
               }
             });
             
-            masterToggle.innerHTML = allHidden ? '🙈 Hide All' : '👀 Show All';
+            masterToggle.innerHTML = allHidden ? '🙈' : '👀';
+          });
+        }
+
+        // Setup chat
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        if (chatForm && chatInput) {
+          chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (message) {
+              await sendChatMessage(message);
+              chatInput.value = '';
+            }
           });
         }
 
@@ -1269,11 +1036,22 @@
         } else {
           showLoginUI();
         }
+
+        // Prevent touch scrolling on mobile
+        document.addEventListener('touchmove', (e) => {
+          if (e.target.closest('.chat-messages') || 
+              e.target.closest('.leaderboard-entries') || 
+              e.target.closest('.shop-content')) {
+            return; // Allow scrolling in these areas
+          }
+          e.preventDefault();
+        }, { passive: false });
       });
   </script>
   <style>
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
     
     body {
@@ -1284,6 +1062,9 @@
       text-align: center;
       overflow: hidden;
       min-height: 100vh;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
     
     h1 {
@@ -1369,6 +1150,7 @@
       z-index: 10;
       transition: all 0.2s ease;
       filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.5));
+      touch-action: none;
     }
     
     .corndog:hover {
@@ -1403,181 +1185,7 @@
     .floating-boss-reward { color: #4ade80; font-size: 2rem; }
     .floating-achievement { color: #a855f7; font-size: 1.5rem; }
     .floating-prestige { color: #fbbf24; font-size: 2rem; }
-    .achievement-desc {
-      font-size: 0.8rem;
-      color: #ccc;
-      margin-bottom: 4px;
-    }
-    
-    .achievement-reward {
-      font-size: 0.8rem;
-      color: #4ade80;
-      font-weight: bold;
-    }
-    
-    .achievement-progress {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .progress-bar {
-      flex: 1;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #ffcc00, #ff9900);
-      border-radius: 3px;
-      transition: width 0.3s ease;
-    }
-    
-    .progress-text {
-      font-size: 0.7rem;
-      color: #999;
-      min-width: 60px;
-      text-align: right;
-    }
-    
-    .achievement-summary {
-      margin-top: 20px;
-      padding: 15px;
-      background: rgba(255, 204, 0, 0.1);
-      border-radius: 8px;
-      border: 1px solid rgba(255, 204, 0, 0.3);
-    }
-    
-    .completion-stats {
-      text-align: center;
-    }
-    
-    .completion-text {
-      color: #ffcc00;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-    
-    .completion-bar {
-      height: 12px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    
-    .completion-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #ffcc00, #ff9900);
-      border-radius: 6px;
-      transition: width 0.3s ease;
-    }
-    
-    .leaderboard-empty {
-      text-align: center;
-      color: #999;
-      font-style: italic;
-      padding: 20px;
-    }
-    
-    /* Power-up styles */
-    .power-up {
-      position: absolute;
-      font-size: 1.5rem;
-      cursor: pointer;
-      user-select: none;
-      z-index: 15;
-      animation: powerUpFloat 3s ease-in-out infinite;
-      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-    }
-    
-    @keyframes powerUpFloat {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(180deg); }
-    }
-    
-    .power-up:hover {
-      transform: scale(1.2);
-      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 1));
-    }
-    
-    /* Multiplier chain styles */
-    .multiplier-chain {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 3rem;
-      font-weight: bold;
-      color: #ff4444;
-      text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
-      animation: chainPulse 0.5s ease-out;
-      z-index: 150;
-      pointer-events: none;
-    }
-    
-    @keyframes chainPulse {
-      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    }
-    
-    /* Auto-upgrade styles */
-    .auto-upgrade-toggle {
-      background: rgba(255, 204, 0, 0.2);
-      border: 1px solid #ffcc00;
-      color: #ffcc00;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      margin-top: 10px;
-      transition: all 0.2s;
-    }
-    
-    .auto-upgrade-toggle.active {
-      background: #ffcc00;
-      color: black;
-    }
-    
-    .auto-upgrade-toggle:hover {
-      background: rgba(255, 204, 0, 0.3);
-    }
-    
-    .floating-powerup { 
-      color: #a855f7; 
-      font-size: 1.8rem; 
-    }
-    
-    .active-powerups {
-      margin-top: 15px;
-      padding: 10px;
-      background: rgba(168, 85, 247, 0.1);
-      border-radius: 8px;
-      border: 1px solid rgba(168, 85, 247, 0.3);
-    }
-    
-    .active-powerups h4 {
-      margin: 0 0 8px 0;
-      color: #a855f7;
-      font-size: 0.9rem;
-    }
-    
-    .powerup-status {
-      font-size: 0.8rem;
-      color: #fff;
-      margin-bottom: 4px;
-      padding: 4px 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
-    
-    .auto-upgrade-section {
-      margin-top: 15px;
-      text-align: center;
-    }
+    .floating-combo { color: #06b6d4; }
     
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
@@ -1627,6 +1235,9 @@
     
     .shop-content {
       display: none;
+      max-height: 400px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     
     .shop-content.active {
@@ -1648,6 +1259,7 @@
       font-family: inherit;
       position: relative;
       overflow: hidden;
+      touch-action: manipulation;
     }
     
     .upgrade button:hover:not(:disabled) {
@@ -1712,6 +1324,7 @@
       backdrop-filter: blur(10px);
       box-shadow: 0 0 40px rgba(255, 68, 68, 0.5);
       z-index: 50;
+      touch-action: none;
     }
     
     .boss-name {
@@ -1804,6 +1417,7 @@
       font-family: inherit;
       font-size: 1.2rem;
       transition: all 0.2s;
+      touch-action: manipulation;
     }
     
     .login-form button:hover {
@@ -1838,6 +1452,12 @@
       margin: 0 0 15px 0;
       color: #ffcc00;
       font-size: 1.2rem;
+    }
+    
+    .leaderboard-entries {
+      max-height: 300px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     
     .leaderboard-entry {
@@ -1902,6 +1522,7 @@
       left: 50%;
       transform: translateX(-50%);
       backdrop-filter: blur(10px);
+      touch-action: manipulation;
     }
     
     .prestige-button:hover:not(:disabled) {
@@ -1979,6 +1600,7 @@
       justify-content: center;
       z-index: 10;
       transition: all 0.2s;
+      touch-action: manipulation;
     }
     
     .toggle-button:hover {
@@ -1988,81 +1610,300 @@
     
     .master-toggle {
       position: fixed;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
+      top: 10px;
+      right: 50%;
+      transform: translateX(50%);
       background: rgba(0, 0, 0, 0.9);
       border: 2px solid #ffcc00;
       color: #ffcc00;
-      padding: 10px 15px;
+      padding: 8px 16px;
       border-radius: 25px;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 1.2rem;
       font-weight: bold;
       z-index: 1000;
       transition: all 0.2s;
       backdrop-filter: blur(10px);
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
+      touch-action: manipulation;
     }
     
     .master-toggle:hover {
       background: rgba(255, 204, 0, 0.1);
-      transform: translateY(-50%) scale(1.05);
+      transform: translateX(50%) scale(1.05);
+    }
+    
+    /* Chat styles */
+    .chat-container {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 350px;
+      max-width: calc(100vw - 40px);
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #ffcc00;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(255, 204, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+      max-height: 50vh;
+    }
+    
+    .chat-header {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
+      color: #ffcc00;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 15px;
+      touch-action: pan-y;
+    }
+    
+    .chat-message {
+      margin-bottom: 12px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .chat-message.own-message {
+      background: rgba(255, 204, 0, 0.1);
+      border-color: rgba(255, 204, 0, 0.3);
+    }
+    
+    .chat-username {
+      font-weight: bold;
+      color: #ffcc00;
+      font-size: 0.9rem;
+    }
+    
+    .chat-count {
+      float: right;
+      color: #4ade80;
+      font-size: 0.8rem;
+    }
+    
+    .chat-text {
+      margin-top: 5px;
+      color: #fff;
+      word-wrap: break-word;
+      font-size: 0.9rem;
+    }
+    
+    .chat-form {
+      display: flex;
+      padding: 15px;
+      gap: 10px;
+      border-top: 1px solid rgba(255, 204, 0, 0.3);
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ffcc00;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .chat-input:focus {
+      outline: none;
+      border-color: #ff9900;
+      box-shadow: 0 0 5px rgba(255, 204, 0, 0.3);
+    }
+    
+    .chat-send {
+      background: #ffcc00;
+      border: none;
+      color: black;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      touch-action: manipulation;
+    }
+    
+    .chat-send:hover {
+      background: #ff9900;
+      transform: scale(1.05);
+    }
+    
+    /* Achievement styles that were missing */
+    .achievement-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border: 2px solid #ffcc00;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      animation: achievementSlide 4s ease-in-out forwards;
+      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.4);
+      max-width: 300px;
+    }
+    
+    @keyframes achievementSlide {
+      0% { transform: translateX(100%); opacity: 0; }
+      10% { transform: translateX(0); opacity: 1; }
+      90% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .achievement-icon {
+      font-size: 2rem;
+      color: #000;
+    }
+    
+    .achievement-content {
+      flex: 1;
+      color: #000;
+    }
+    
+    .achievement-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .achievement-reward {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    .achievements-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    
+    .achievement-category {
+      margin-bottom: 20px;
+    }
+    
+    .achievement-category h4 {
+      color: #ffcc00;
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
+      padding-bottom: 5px;
+    }
+    
+    .achievement {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    
+    .achievement:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .achievement.unlocked {
+      background: rgba(255, 204, 0, 0.15);
+      border-color: rgba(255, 204, 0, 0.3);
+    }
+    
+    .achievement-info {
+      margin-bottom: 8px;
+    }
+    
+    .achievement-name {
+      font-weight: bold;
+      color: #fff;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    
+    .achievement.unlocked .achievement-name {
+      color: #ffcc00;
+    }
+    
+    .achievement-desc {
+      font-size: 0.8rem;
+      color: #ccc;
     }
     
     /* Mobile responsiveness */
     @media (max-width: 768px) {
+      body {
+        touch-action: pan-y;
+      }
+      
+      h1 {
+        font-size: 1.4rem;
+        margin: 0.5rem 0;
+      }
+      
       #shop {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
-        left: 20px;
+        bottom: 80px;
+        right: 10px;
+        left: 10px;
         top: auto;
         max-width: none;
-        max-height: 40vh;
-        overflow-y: auto;
+        max-height: 35vh;
+        padding: 15px;
       }
       
       #leaderboard {
         position: fixed;
-        top: 20px;
-        left: 20px;
-        right: 20px;
+        top: 60px;
+        left: 10px;
+        right: 10px;
         max-width: none;
-        max-height: 30vh;
-        overflow-y: auto;
+        max-height: 25vh;
+        padding: 15px;
       }
       
       .stats-container {
         margin: 10px;
         gap: 10px;
         position: relative;
+        grid-template-columns: 1fr;
+        max-height: 30vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
       
       .prestige-button {
-        bottom: 200px;
-        padding: 12px 25px;
-        font-size: 1rem;
+        bottom: 10px;
+        padding: 10px 20px;
+        font-size: 0.9rem;
       }
       
       .corndog {
-        font-size: 2rem;
+        font-size: 2.2rem;
       }
       
       .boss {
         max-width: 90vw;
+        padding: 15px;
+      }
+      
+      .boss-health {
+        width: 200px;
       }
       
       .master-toggle {
-        writing-mode: horizontal-tb;
-        text-orientation: mixed;
-        top: auto;
-        bottom: 10px;
-        right: 10px;
-        transform: none;
-        padding: 8px 12px;
-        font-size: 0.8rem;
+        top: 5px;
+        padding: 6px 12px;
+        font-size: 1rem;
       }
       
       .toggle-button {
@@ -2070,25 +1911,95 @@
         height: 25px;
         font-size: 0.7rem;
       }
+      
+      .chat-container {
+        bottom: 60px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        height: 300px;
+      }
+      
+      #reaper {
+        max-width: 60vw;
+        margin: 0.5rem auto;
+      }
+      
+      .upgrade button {
+        padding: 12px;
+      }
+      
+      .upgrade-icon {
+        font-size: 1.2rem;
+      }
+      
+      .upgrade-name {
+        font-size: 0.9rem;
+      }
+      
+      .upgrade-details {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+      
+      .shop-content {
+        max-height: 25vh;
+      }
+      
+      .leaderboard-entries {
+        max-height: 15vh;
+      }
     }
     
     @media (max-width: 480px) {
-      h1 {
-        font-size: 1.5rem;
-        margin: 0.5rem 0;
-      }
-      
       .stats-container {
-        grid-template-columns: 1fr;
+        display: none; /* Hide stats on very small screens to save space */
       }
       
       .corndog {
-        font-size: 1.8rem;
+        font-size: 2rem;
       }
       
       .floating-text {
         font-size: 1rem;
       }
+      
+      .boss {
+        padding: 10px;
+      }
+      
+      .boss-name {
+        font-size: 1.2rem;
+      }
+      
+      .boss-image {
+        font-size: 3rem;
+      }
+    }
+    
+    /* Prevent text selection on game elements */
+    .corndog, .boss, button, .stat-value, .stat-label {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* Improve touch targets */
+    button, .corndog, .boss, .tab-btn, .toggle-button {
+      min-width: 44px;
+      min-height: 44px;
+    }
+    
+    /* Game area for better corn dog spawning */
+    #game-area {
+      position: fixed;
+      top: 100px;
+      left: 0;
+      right: 0;
+      bottom: 100px;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -2110,6 +2021,8 @@
 
   <div id="gameContent" style="display: none;">
     <h1>Today I Will Eat Five Corn Dogs</h1>
+    
+    <button class="master-toggle" id="master-toggle">👀</button>
     
     <div class="stats-container" id="stats-container">
       <button class="toggle-button" id="toggle-stats" title="Hide stats">❌</button>
@@ -2156,6 +2069,8 @@
     
     <img src="corn-dog-reaper.gif" id="reaper" alt="Corn Dog Reaper">
     
+    <div id="game-area"></div>
+    
     <div id="shop">
       <button class="toggle-button" id="toggle-shop" title="Hide shop">❌</button>
       <div class="shop-tabs">
@@ -2182,8 +2097,16 @@
     <div id="leaderboard">
       <button class="toggle-button" id="toggle-leaderboard" title="Hide leaderboard">❌</button>
     </div>
-
-    <button class="master-toggle" id="master-toggle">👀 Show All</button>
+    
+    <div class="chat-container" id="chat-container">
+      <button class="toggle-button" id="toggle-chat" title="Hide chat">❌</button>
+      <div class="chat-header">💬 Global Chat</div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <form class="chat-form" id="chat-form">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." maxlength="200">
+        <button type="submit" class="chat-send">Send</button>
+      </form>
+    </div>
 
     <button id="prestige-btn" class="prestige-button">
       <div class="prestige-content">
