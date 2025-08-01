@@ -43,6 +43,24 @@
       let money = 0;
       let multiplier = 1;
       let autoClickers = 0;
+      let bossHealth = 0;
+      let currentBoss = null;
+      let upgradeLevel = 1;
+      let passiveIncome = 0;
+      
+      const BOSSES = [
+        { name: "Mega Corn Dog", health: 100, reward: 500, image: "🌭", scale: 2 },
+        { name: "Mustard King", health: 500, reward: 2000, image: "👑", scale: 2.5 },
+        { name: "Deep Fryer Boss", health: 2000, reward: 10000, image: "🔥", scale: 3 },
+        { name: "Corn Dog Reaper", health: 10000, reward: 50000, image: "💀", scale: 4 }
+      ];
+      
+      const UPGRADES = {
+        autoClicker: { base: 100, scale: 1.5, name: "Auto-Eater" },
+        multiplier: { base: 50, scale: 2, name: "Click Power" },
+        passive: { base: 200, scale: 2, name: "Passive Income" },
+        critical: { base: 300, scale: 2.5, name: "Critical Hits" }
+      };
 
       async function loadData() {
         const docRef = doc(db, "users", userId);
@@ -53,6 +71,8 @@
           money = data.money || 0;
           multiplier = data.multiplier || 1;
           autoClickers = data.autoClickers || 0;
+          upgradeLevel = data.upgradeLevel || 1;
+          passiveIncome = data.passiveIncome || 0;
         }
         updateUI();
       }
@@ -62,16 +82,85 @@
           count,
           money,
           multiplier,
-          autoClickers
+          autoClickers,
+          upgradeLevel,
+          passiveIncome
         });
       }
 
       function updateUI() {
         counterElem.textContent = `Corn Dogs Eaten: ${count}`;
         moneyElem.textContent = `Money: $${money}`;
-        dpsElem.textContent = `Auto-Eaters: ${autoClickers}/s`;
-        buyMultBtn.textContent = `Upgrade Click (+1) — $${50 * multiplier}`;
-        buyAutoBtn.textContent = `Buy Auto-Eater — $${100 * (autoClickers + 1)}`;
+        dpsElem.textContent = `DPS: ${autoClickers + passiveIncome}/s`;
+        
+        // Update shop buttons
+        document.getElementById("shop").innerHTML = `
+          <div class="upgrade">
+            <button id="buy-mult">
+              <span class="upgrade-name">${UPGRADES.multiplier.name}</span>
+              <span class="upgrade-desc">Current: ${multiplier}x</span>
+              <span class="upgrade-cost">$${Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1))}</span>
+            </button>
+          </div>
+          <div class="upgrade">
+            <button id="buy-auto">
+              <span class="upgrade-name">${UPGRADES.autoClicker.name}</span>
+              <span class="upgrade-desc">Current: ${autoClickers}/s</span>
+              <span class="upgrade-cost">$${Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers))}</span>
+            </button>
+          </div>
+          <div class="upgrade">
+            <button id="buy-passive">
+              <span class="upgrade-name">${UPGRADES.passive.name}</span>
+              <span class="upgrade-desc">Current: ${passiveIncome}/s</span>
+              <span class="upgrade-cost">$${Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome))}</span>
+            </button>
+          </div>
+        `;
+        
+        // Reattach event listeners
+        document.getElementById("buy-mult").addEventListener("click", handleUpgrade("multiplier"));
+        document.getElementById("buy-auto").addEventListener("click", handleUpgrade("autoClicker"));
+        document.getElementById("buy-passive").addEventListener("click", handleUpgrade("passive"));
+      }
+      
+      function handleUpgrade(type) {
+        return async () => {
+          const upgrade = UPGRADES[type];
+          let current, cost;
+          
+          switch(type) {
+            case "multiplier":
+              current = multiplier - 1;
+              cost = Math.floor(upgrade.base * Math.pow(upgrade.scale, current));
+              if (money >= cost) {
+                money -= cost;
+                multiplier++;
+              }
+              break;
+            case "autoClicker":
+              current = autoClickers;
+              cost = Math.floor(upgrade.base * Math.pow(upgrade.scale, current));
+              if (money >= cost) {
+                money -= cost;
+                autoClickers++;
+              }
+              break;
+            case "passive":
+              current = passiveIncome;
+              cost = Math.floor(upgrade.base * Math.pow(upgrade.scale, current));
+              if (money >= cost) {
+                money -= cost;
+                passiveIncome++;
+              }
+              break;
+          }
+          
+          if (money >= cost) {
+            updateUI();
+            await saveData();
+          }
+        };
       }
 
       function spawnFloatingText(x, y, text) {
@@ -84,7 +173,51 @@
         setTimeout(() => float.remove(), 1000);
       }
 
+      function spawnBoss() {
+        if (currentBoss) return;
+        const bossIndex = Math.min(Math.floor(count / 1000), BOSSES.length - 1);
+        currentBoss = { ...BOSSES[bossIndex] };
+        bossHealth = currentBoss.health;
+        
+        const boss = document.createElement("div");
+        boss.className = "boss";
+        boss.innerHTML = `
+          <div class="boss-health">
+            <div class="health-bar" style="width: 100%"></div>
+          </div>
+          <div class="boss-image">${currentBoss.image}</div>
+          <div class="boss-name">${currentBoss.name}</div>
+        `;
+        boss.style.top = "50%";
+        boss.style.left = "50%";
+        boss.style.transform = `translate(-50%, -50%) scale(${currentBoss.scale})`;
+        document.body.appendChild(boss);
+        
+        boss.addEventListener("click", async (e) => {
+          const damage = multiplier * (Math.random() < 0.1 ? 2 : 1); // 10% crit chance
+          bossHealth -= damage;
+          const healthPercent = (bossHealth / currentBoss.health) * 100;
+          boss.querySelector(".health-bar").style.width = `${Math.max(0, healthPercent)}%`;
+          
+          spawnFloatingText(e.pageX, e.pageY, damage * 2 === multiplier ? "CRIT!" : `${damage}`);
+          
+          if (bossHealth <= 0) {
+            money += currentBoss.reward;
+            spawnFloatingText(e.pageX, e.pageY - 30, `+$${currentBoss.reward}!`);
+            boss.remove();
+            currentBoss = null;
+            updateUI();
+            await saveData();
+          }
+        });
+      }
+
       function spawnCornDog() {
+        if (Math.random() < 0.05 && count >= 1000) { // 5% chance to spawn boss after 1000 corn dogs
+          spawnBoss();
+          return;
+        }
+
         const corndog = document.createElement("div");
         corndog.className = "corndog";
         corndog.textContent = "🌭";
@@ -94,14 +227,19 @@
 
         const spawnSound = document.getElementById("spawnSound");
         spawnSound.currentTime = 0;
-        spawnSound.play();
+        try {
+          spawnSound.play().catch(() => {}); // Ignore autoplay blocking
+        } catch (e) {}
 
         corndog.addEventListener("click", async (e) => {
-          count += multiplier;
-          money += multiplier;
+          const clickValue = multiplier * (Math.random() < 0.1 ? 2 : 1); // 10% crit chance
+          count += clickValue;
+          money += clickValue;
           updateUI();
-          document.getElementById("eatSound").play();
-          spawnFloatingText(e.pageX, e.pageY, `+${multiplier}`);
+          try {
+            document.getElementById("eatSound").play().catch(() => {});
+          } catch (e) {}
+          spawnFloatingText(e.pageX, e.pageY, clickValue === multiplier * 2 ? "CRIT!" : `+${clickValue}`);
           corndog.remove();
           await saveData();
         });
@@ -189,22 +327,74 @@
       position: fixed;
       right: 20px;
       top: 20px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.8);
       border: 2px solid #ffcc00;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
     }
-    #shop button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 1rem;
-      background: #ffcc00;
-      color: #000;
+    .upgrade {
+      margin-bottom: 15px;
+    }
+    .upgrade button {
+      width: 100%;
+      background: linear-gradient(to bottom, #ffcc00, #ff9900);
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      padding: 15px;
       cursor: pointer;
+      transition: transform 0.2s, filter 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-family: Impact, sans-serif;
+    }
+    .upgrade button:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+    .upgrade-name {
+      font-size: 1.2rem;
+      color: #000;
       font-weight: bold;
+    }
+    .upgrade-desc {
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .upgrade-cost {
+      font-size: 1rem;
+      color: #000;
+      font-weight: bold;
+    }
+    .boss {
+      position: fixed;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+    }
+    .boss-health {
+      width: 200px;
+      height: 20px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .health-bar {
+      height: 100%;
+      background: linear-gradient(to right, #ff0000, #ff4400);
+      transition: width 0.2s;
+    }
+    .boss-image {
+      font-size: 4rem;
+      margin: 10px 0;
+    }
+    .boss-name {
+      color: #ffcc00;
+      font-size: 1.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
     #reaper {
       max-width: 90%;
