@@ -3,168 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <title>Corn Dog Reaper</title>
-  <link rel="icon" href="🌭">
+  <script type="module">
+    // Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  <!-- Discord Embed -->
-  <meta property="og:title" content="Today I Will Eat Five Corn Dogs">
-  <meta property="og:description" content="Join the corn dog reaper on his noble mission.">
-  <meta property="og:image" content="https://iwilleatcorndogs.today/corn-dog-reaper.gif">
-  <meta property="og:url" content="https://iwilleatcorndogs.today/">
-  <meta name="twitter:card" content="summary_large_image">
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyChqD_9j3np8jnrM4BXDnhrRl4r52TamZk",
+      authDomain: "corn-dog-clicker.firebaseapp.com",
+      projectId: "corn-dog-clicker",
+      storageBucket: "corn-dog-clicker.firebasestorage.app",
+      messagingSenderId: "824338629929",
+      appId: "1:824338629929:web:8d49dd2b7923bf41976338"
+    };
 
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: white;
-      font-family: Impact, Haettenschweiler, 'Arial Black', sans-serif;
-      text-align: center;
-      overflow: hidden;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Auto-generate user ID
+    let userId = localStorage.getItem("user_id");
+    if (!userId) {
+      userId = "user_" + crypto.randomUUID();
+      localStorage.setItem("user_id", userId);
     }
 
-    h1 {
-      font-size: 3rem;
-      margin-top: 2rem;
-    }
-
-    .gif {
-      max-width: 90%;
-      height: auto;
-      border: 5px solid #ff9900;
-      margin: 1rem auto;
-      box-shadow: 0 0 20px #ff9900;
-    }
-
-    #counter {
-      font-size: 2rem;
-      margin-top: 0.5rem;
-      color: #ffcc00;
-    }
-
-    #notif-container {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      display: flex;
-      flex-direction: column-reverse;
-      gap: 10px;
-      z-index: 1000;
-    }
-
-    .notif {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      padding: 10px 15px;
-      font-size: 1.1rem;
-      border-left: 4px solid #ffcc00;
-      border-radius: 6px;
-      animation: fadeInOut 6s ease-in-out forwards;
-    }
-
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateY(20px); }
-      10% { opacity: 1; transform: translateY(0); }
-      90% { opacity: 1; }
-      100% { opacity: 0; transform: translateY(20px); }
-    }
-
-    #jumpscare {
-      display: none;
-      position: fixed;
-      z-index: 9999;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: black;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #jumpscare img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    .corndog {
-      position: absolute;
-      font-size: 2rem;
-      cursor: pointer;
-      user-select: none;
-      z-index: 10;
-      transition: transform 0.2s ease;
-    }
-
-    .corndog:hover {
-      transform: scale(1.3);
-    }
-
-    #explosion {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-      z-index: 10000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #explosion img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translate(0, 0); }
-      25% { transform: translate(-10px, 5px); }
-      50% { transform: translate(10px, -5px); }
-      75% { transform: translate(-5px, 10px); }
-    }
-  </style>
-</head>
-<body>
-  <h1>Today I Will Eat Five Corn Dogs</h1>
-  <img src="corn-dog-reaper.gif" class="gif" alt="Corn Dog Reaper">
-  <div id="counter">Corn Dogs Eaten: 0</div>
-
-  <div id="notif-container"></div>
-
-  <div id="jumpscare">
-    <img src="tenor.gif" alt="Jumpscare">
-    <audio id="scream" src="https://www.myinstants.com/media/sounds/scream.mp3" preload="auto"></audio>
-  </div>
-
-  <div id="explosion">
-    <img src="explosion.gif" alt="Explosion">
-    <audio id="boom" src="https://www.myinstants.com/media/sounds/explosion.mp3" preload="auto"></audio>
-  </div>
-
-  <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/minecraft-pop.mp3" preload="auto"></audio>
-  <audio id="eatSound" src="https://www.myinstants.com/media/sounds/minecraft_eat.mp3" preload="auto"></audio>
-  <audio id="reminderSound" src="eat-some-corndogs.mp3" preload="auto"></audio>
-
-  <script>
+    // Game logic
     let count = 0;
-    const counter = document.getElementById('counter');
-    const jumpscare = document.getElementById('jumpscare');
-    const scream = document.getElementById('scream');
-    const notifContainer = document.getElementById('notif-container');
-    const spawnSound = document.getElementById('spawnSound');
-    const eatSound = document.getElementById('eatSound');
-    const reminderSound = document.getElementById('reminderSound');
-    const explosion = document.getElementById('explosion');
-    const boom = document.getElementById('boom');
     let lastClickTime = Date.now();
+    const counter = document.getElementById("counter");
+    const spawnSound = document.getElementById("spawnSound");
+    const eatSound = document.getElementById("eatSound");
+    const reminderSound = document.getElementById("reminderSound");
+    const jumpscare = document.getElementById("jumpscare");
+    const scream = document.getElementById("scream");
+    const explosion = document.getElementById("explosion");
+    const boom = document.getElementById("boom");
+    const notifContainer = document.getElementById("notif-container");
 
-    function speakMilestone(count) {
-      const msg = new SpeechSynthesisUtterance(`Wow. I can't believe you ate ${count} corn dogs.`);
-      msg.volume = Math.min(1, count / 100);
-      msg.pitch = 1 + ((count % 100) / 200);
-      msg.rate = 1;
-      window.speechSynthesis.speak(msg);
+    async function loadProgress() {
+      try {
+        const docRef = doc(db, "players", userId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          count = docSnap.data().count || 0;
+        }
+        counter.textContent = `Corn Dogs Eaten: ${count}`;
+      } catch (e) {
+        console.warn("Failed to load Firebase save. Using fallback.");
+        count = parseInt(localStorage.getItem("corndog_count")) || 0;
+        counter.textContent = `Corn Dogs Eaten: ${count}`;
+      }
+    }
+
+    async function saveProgress() {
+      try {
+        await setDoc(doc(db, "players", userId), { count });
+      } catch (e) {
+        localStorage.setItem("corndog_count", count);
+      }
     }
 
     function spawnCornDog() {
@@ -178,25 +75,20 @@
       spawnSound.currentTime = 0;
       spawnSound.play();
 
-      corndog.addEventListener('click', () => {
+      corndog.addEventListener('click', async () => {
         count++;
         counter.textContent = `Corn Dogs Eaten: ${count}`;
         eatSound.currentTime = 0;
         eatSound.play();
         lastClickTime = Date.now();
         corndog.remove();
-
-        if (count % 10 === 0) {
-          speakMilestone(count);
-        }
+        await saveProgress();
 
         if (count % 100 === 0) {
           jumpscare.style.display = 'flex';
           scream.currentTime = 0;
           scream.play();
-          setTimeout(() => {
-            jumpscare.style.display = 'none';
-          }, 4000);
+          setTimeout(() => { jumpscare.style.display = 'none'; }, 4000);
         }
 
         if (count === 500) {
@@ -204,7 +96,6 @@
           boom.currentTime = 0;
           boom.play();
           document.body.style.animation = 'shake 0.3s infinite';
-
           setTimeout(() => {
             explosion.style.display = 'none';
             document.body.style.animation = '';
@@ -247,6 +138,45 @@
       notifContainer.appendChild(notif);
       setTimeout(() => notif.remove(), 6000);
     }, 2500);
+
+    window.addEventListener("DOMContentLoaded", loadProgress);
   </script>
+
+  <style>
+    /* [Same CSS from before — keep unchanged] */
+    body { margin: 0; background: #000; color: white; font-family: Impact; text-align: center; overflow: hidden; }
+    h1 { font-size: 3rem; margin-top: 2rem; }
+    .gif { max-width: 90%; height: auto; border: 5px solid #ff9900; margin: 1rem auto; box-shadow: 0 0 20px #ff9900; }
+    #counter { font-size: 2rem; margin-top: 0.5rem; color: #ffcc00; }
+    .corndog { position: absolute; font-size: 2rem; cursor: pointer; user-select: none; z-index: 10; transition: transform 0.2s ease; }
+    .corndog:hover { transform: scale(1.3); }
+    #notif-container { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 1000; }
+    .notif { background: rgba(255,255,255,0.1); color: white; padding: 10px 15px; font-size: 1.1rem; border-left: 4px solid #ffcc00; border-radius: 6px; animation: fadeInOut 6s ease-in-out forwards; }
+    @keyframes fadeInOut { 0% {opacity: 0; transform: translateY(20px);} 10% {opacity: 1; transform: translateY(0);} 90% {opacity: 1;} 100% {opacity: 0; transform: translateY(20px);} }
+    #jumpscare, #explosion { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100vw; height: 100vh; background-color: black; justify-content: center; align-items: center; }
+    #jumpscare img, #explosion img { max-width: 100%; max-height: 100%; }
+    @keyframes shake { 0%, 100% {transform: translate(0,0);} 25% {transform: translate(-10px,5px);} 50% {transform: translate(10px,-5px);} 75% {transform: translate(-5px,10px);} }
+  </style>
+</head>
+<body>
+  <h1>Today I Will Eat Five Corn Dogs</h1>
+  <img src="corn-dog-reaper.gif" class="gif" alt="Corn Dog Reaper">
+  <div id="counter">Corn Dogs Eaten: 0</div>
+
+  <div id="notif-container"></div>
+
+  <div id="jumpscare">
+    <img src="tenor.gif" alt="Jumpscare">
+    <audio id="scream" src="https://www.myinstants.com/media/sounds/scream.mp3" preload="auto"></audio>
+  </div>
+
+  <div id="explosion">
+    <img src="explosion.gif" alt="Explosion">
+    <audio id="boom" src="https://www.myinstants.com/media/sounds/explosion.mp3" preload="auto"></audio>
+  </div>
+
+  <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/minecraft-pop.mp3" preload="auto"></audio>
+  <audio id="eatSound" src="https://www.myinstants.com/media/sounds/minecraft_eat.mp3" preload="auto"></audio>
+  <audio id="reminderSound" src="eat-some-corndogs.mp3" preload="auto"></audio>
 </body>
 </html>
