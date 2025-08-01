@@ -320,30 +320,7 @@
       // Initialize DOM elements
       let counterElem, moneyElem, dpsElem, buyMultBtn, buyAutoBtn;
 
-      document.addEventListener("DOMContentLoaded", () => {
-        console.log('DOM Content Loaded');
-        // Setup login form handler
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-          loginForm.addEventListener('submit', handleLogin);
-          console.log('Login form handler attached');
-        }
-
-        // Setup game UI elements
-        counterElem = document.getElementById("counter");
-        moneyElem = document.getElementById("money");
-        dpsElem = document.getElementById("dps");
-        
-        const prestigeBtn = document.getElementById('prestige-btn');
-        if (prestigeBtn) {
-          prestigeBtn.addEventListener('click', handlePrestige);
-        }
-
-        // These will be reattached in updateUI()
-        buyMultBtn = document.getElementById("buy-mult");
-        buyAutoBtn = document.getElementById("buy-auto");
-      
-      // Constants
+      // Constants - Moved outside DOMContentLoaded for global access
       const PRESTIGE_COST = 1000000;
       const GOLDEN_CORNDOG_VALUE = 1000;
       const MAX_COMBO_TIME = 2000; // 2 seconds to maintain combo
@@ -633,25 +610,7 @@
         }, 8000);
       }
 
-      buyMultBtn.addEventListener("click", async () => {
-        const cost = 50 * multiplier;
-        if (money >= cost) {
-          money -= cost;
-          multiplier++;
-          updateUI();
-          await saveData();
-        }
-      });
-
-      buyAutoBtn.addEventListener("click", async () => {
-        const cost = 100 * (autoClickers + 1);
-        if (money >= cost) {
-          money -= cost;
-          autoClickers++;
-          updateUI();
-          await saveData();
-        }
-      });
+      // Event listeners are now handled in updateUI() function
 
       setInterval(() => {
         if (autoClickers > 0) {
@@ -794,7 +753,26 @@
       }
 
       // Functions have been moved outside DOMContentLoaded
-    });
+      // Initialize DOM elements and attach event listeners
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log('DOM Content Loaded');
+        // Setup login form handler
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+          loginForm.addEventListener('submit', handleLogin);
+          console.log('Login form handler attached');
+        }
+
+        // Setup game UI elements
+        counterElem = document.getElementById("counter");
+        moneyElem = document.getElementById("money");
+        dpsElem = document.getElementById("dps");
+        
+        const prestigeBtn = document.getElementById('prestige-btn');
+        if (prestigeBtn) {
+          prestigeBtn.addEventListener('click', handlePrestige);
+        }
+      });
   </script>
   <style>
     body {
