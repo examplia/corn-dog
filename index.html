@@ -90,6 +90,7 @@
       const buyMultBtn = document.getElementById("buy-mult");
       const buyAutoBtn = document.getElementById("buy-auto");
 
+      // Game state
       let count = 0;
       let money = 0;
       let multiplier = 1;
@@ -98,6 +99,54 @@
       let currentBoss = null;
       let upgradeLevel = 1;
       let passiveIncome = 0;
+      let prestige = 0;
+      let prestigeMultiplier = 1;
+      let critChance = 0.1;
+      let critMultiplier = 2;
+      let comboCount = 0;
+      let maxCombo = 0;
+      let achievements = {};
+      let goldenCornDogChance = 0.01;
+      let lastClickTime = 0;
+      let clicksPerSecond = 0;
+      let totalClicks = 0;
+      let bossKills = 0;
+      let goldenCornDogsFound = 0;
+      let timePlayedSeconds = 0;
+      
+      // Constants
+      const PRESTIGE_COST = 1000000;
+      const GOLDEN_CORNDOG_VALUE = 1000;
+      const MAX_COMBO_TIME = 2000; // 2 seconds to maintain combo
+      
+      const ACHIEVEMENTS = {
+        clicks: [
+          { id: 'click1', name: '100 Clicks', req: 100, reward: 50 },
+          { id: 'click2', name: '1,000 Clicks', req: 1000, reward: 500 },
+          { id: 'click3', name: '10,000 Clicks', req: 10000, reward: 5000 }
+        ],
+        corndogs: [
+          { id: 'dogs1', name: 'Corn Dog Novice', req: 1000, reward: 100 },
+          { id: 'dogs2', name: 'Corn Dog Expert', req: 10000, reward: 1000 },
+          { id: 'dogs3', name: 'Corn Dog Master', req: 100000, reward: 10000 }
+        ],
+        bosses: [
+          { id: 'boss1', name: 'Boss Slayer', req: 1, reward: 1000 },
+          { id: 'boss2', name: 'Boss Hunter', req: 5, reward: 5000 },
+          { id: 'boss3', name: 'Boss Master', req: 10, reward: 10000 }
+        ],
+        golden: [
+          { id: 'golden1', name: 'Lucky!', req: 1, reward: 1000 },
+          { id: 'golden2', name: 'Fortune Favored', req: 5, reward: 5000 },
+          { id: 'golden3', name: 'Golden God', req: 10, reward: 10000 }
+        ]
+      };
+      
+      const SPECIAL_EVENTS = [
+        { name: "Corn Dog Rain", duration: 10000, spawnRate: 300 },
+        { name: "Boss Rush", duration: 30000, bossOnly: true },
+        { name: "Golden Hour", duration: 60000, goldenChance: 0.1 }
+      ];
       
       const BOSSES = [
         { name: "Mega Corn Dog", health: 100, reward: 500, image: "🌭", scale: 2 },
@@ -129,14 +178,49 @@
       }
 
       async function saveData() {
+        const username = auth.currentUser.email.split('@')[0];
         await setDoc(doc(db, "users", userId), {
           count,
           money,
           multiplier,
           autoClickers,
           upgradeLevel,
-          passiveIncome
+          passiveIncome,
+          prestige,
+          achievements,
+          username,
+          lastUpdated: new Date().getTime()
         });
+        updateLeaderboard();
+      }
+      
+      async function updateLeaderboard() {
+        const leaderboardElem = document.getElementById("leaderboard");
+        const snapshot = await getDocs(query(
+          collection(db, "users"),
+          orderBy("count", "desc"),
+          limit(10)
+        ));
+        
+        let leaderboardHTML = `
+          <h3>Top Corn Dog Eaters</h3>
+          <div class="leaderboard-entries">
+        `;
+        
+        snapshot.forEach((doc, index) => {
+          const data = doc.data();
+          const isCurrentUser = doc.id === userId;
+          leaderboardHTML += `
+            <div class="leaderboard-entry ${isCurrentUser ? 'current-user' : ''}">
+              <span class="rank">#${index + 1}</span>
+              <span class="username">${data.username}</span>
+              <span class="score">${numberFormat(data.count)} 🌭</span>
+            </div>
+          `;
+        });
+        
+        leaderboardHTML += `</div>`;
+        leaderboardElem.innerHTML = leaderboardHTML;
       }
 
       function updateUI() {
@@ -329,9 +413,125 @@
         }
       }, 1000);
 
+      function numberFormat(num) {
+        if (num >= 1e9) return (num/1e9).toFixed(1) + 'B';
+        if (num >= 1e6) return (num/1e6).toFixed(1) + 'M';
+        if (num >= 1e3) return (num/1e3).toFixed(1) + 'K';
+        return num.toString();
+      }
+
+      function checkAchievements() {
+        ACHIEVEMENTS.clicks.forEach(ach => {
+          if (!achievements[ach.id] && totalClicks >= ach.req) {
+            unlockAchievement(ach);
+          }
+        });
+        
+        ACHIEVEMENTS.corndogs.forEach(ach => {
+          if (!achievements[ach.id] && count >= ach.req) {
+            unlockAchievement(ach);
+          }
+        });
+        
+        ACHIEVEMENTS.bosses.forEach(ach => {
+          if (!achievements[ach.id] && bossKills >= ach.req) {
+            unlockAchievement(ach);
+          }
+        });
+        
+        ACHIEVEMENTS.golden.forEach(ach => {
+          if (!achievements[ach.id] && goldenCornDogsFound >= ach.req) {
+            unlockAchievement(ach);
+          }
+        });
+      }
+
+      function unlockAchievement(ach) {
+        achievements[ach.id] = true;
+        money += ach.reward;
+        spawnFloatingText(
+          window.innerWidth/2,
+          window.innerHeight/2,
+          `Achievement: ${ach.name}\n+$${ach.reward}!`
+        );
+        saveData();
+      }
+
+      function updateCombo(x, y) {
+        const now = Date.now();
+        if (now - lastClickTime < MAX_COMBO_TIME) {
+          comboCount++;
+          if (comboCount > maxCombo) {
+            maxCombo = comboCount;
+          }
+          if (comboCount > 1) {
+            spawnFloatingText(x, y - 30, `Combo x${comboCount}!`);
+          }
+        } else {
+          comboCount = 1;
+        }
+        lastClickTime = now;
+      }
+
+      function startRandomEvent() {
+        if (Math.random() < 0.1) { // 10% chance every minute
+          const event = SPECIAL_EVENTS[Math.floor(Math.random() * SPECIAL_EVENTS.length)];
+          startEvent(event);
+        }
+      }
+
+      function startEvent(event) {
+        const eventDiv = document.createElement('div');
+        eventDiv.className = 'event-announcement';
+        eventDiv.textContent = `🎉 ${event.name} Started! 🎉`;
+        document.body.appendChild(eventDiv);
+        
+        let originalSpawnRate = 1200;
+        if (event.spawnRate) {
+          clearInterval(spawnInterval);
+          spawnInterval = setInterval(spawnCornDog, event.spawnRate);
+        }
+        
+        if (event.goldenChance) {
+          const originalChance = goldenCornDogChance;
+          goldenCornDogChance = event.goldenChance;
+          setTimeout(() => { goldenCornDogChance = originalChance; }, event.duration);
+        }
+        
+        setTimeout(() => {
+          eventDiv.remove();
+          if (event.spawnRate) {
+            clearInterval(spawnInterval);
+            spawnInterval = setInterval(spawnCornDog, originalSpawnRate);
+          }
+        }, event.duration);
+      }
+
+      function prestige() {
+        if (count >= PRESTIGE_COST) {
+          prestige++;
+          prestigeMultiplier = 1 + (prestige * 0.5);
+          count = 0;
+          money = 0;
+          multiplier = 1;
+          autoClickers = 0;
+          passiveIncome = 0;
+          updateUI();
+          saveData();
+          spawnFloatingText(
+            window.innerWidth/2,
+            window.innerHeight/2,
+            `🌟 Prestiged! New multiplier: x${prestigeMultiplier}`
+          );
+        }
+      }
+
+      let spawnInterval;
       function startGame() {
         loadData().then(() => {
-          setInterval(spawnCornDog, 1200);
+          spawnInterval = setInterval(spawnCornDog, 1200);
+          setInterval(startRandomEvent, 60000); // Check for random events every minute
+          setInterval(() => { timePlayedSeconds++; }, 1000);
         });
       }
     });
@@ -497,6 +697,134 @@
       margin: 1rem auto;
       box-shadow: 0 0 20px #ff9900;
     }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    
+    .main-stats, .secondary-stats {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #ffcc00;
+      padding: 15px;
+      border-radius: 10px;
+      min-width: 200px;
+    }
+    
+    .shop-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .tab-btn {
+      background: rgba(255, 204, 0, 0.2);
+      border: 1px solid #ffcc00;
+      color: #ffcc00;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab-btn.active {
+      background: #ffcc00;
+      color: black;
+    }
+    
+    .shop-content {
+      display: none;
+    }
+    
+    .shop-content.active {
+      display: block;
+    }
+    
+    .achievement {
+      background: rgba(255, 255, 255, 0.1);
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .achievement.unlocked {
+      background: rgba(255, 204, 0, 0.2);
+    }
+    
+    .event-announcement {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      border: 3px solid #ffcc00;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 2rem;
+      animation: pulse 2s infinite;
+      z-index: 100;
+    }
+    
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    
+    .prestige-button {
+      background: linear-gradient(to bottom, #ff00ff, #ff00aa);
+      border: none;
+      padding: 15px 30px;
+      color: white;
+      font-size: 1.2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 20px;
+      transition: all 0.2s;
+    }
+    
+    .prestige-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+    }
+    
+    #leaderboard {
+      position: fixed;
+      left: 20px;
+      top: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #ffcc00;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 300px;
+    }
+    
+    .leaderboard-entry {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px;
+      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
+    }
+    
+    .leaderboard-entry.current-user {
+      background: rgba(255, 204, 0, 0.2);
+    }
+    
+    .golden-corndog {
+      filter: brightness(1.5) sepia(1) saturate(5);
+      animation: shine 1s infinite;
+    }
+    
+    @keyframes shine {
+      0% { filter: brightness(1.5) sepia(1) saturate(5); }
+      50% { filter: brightness(2) sepia(1) saturate(6); }
+      100% { filter: brightness(1.5) sepia(1) saturate(5); }
+    }
   </style>
 </head>
 <body>
@@ -514,14 +842,48 @@
 
   <div id="gameContent" style="display: none;">
     <h1>Today I Will Eat Five Corn Dogs</h1>
-    <img src="corn-dog-reaper.gif" id="reaper" alt="Corn Dog Reaper">
-    <div id="counter">Corn Dogs Eaten: 0</div>
-    <div id="money">Money: $0</div>
-    <div id="dps">Auto-Eaters: 0/s</div>
-    <div id="shop">
-      <button id="buy-mult">Upgrade Click (+1) — $cost</button>
-      <button id="buy-auto">Buy Auto-Eater — $cost</button>
+    <div class="stats-container">
+      <div class="main-stats">
+        <div id="counter">Corn Dogs Eaten: 0</div>
+        <div id="money">Money: $0</div>
+        <div id="dps">DPS: 0/s</div>
+        <div id="prestige-info">Prestige Level: 0 (x1.0 bonus)</div>
+      </div>
+      <div class="secondary-stats">
+        <div id="combo-counter">Current Combo: x1</div>
+        <div id="crit-chance">Crit Chance: 10%</div>
+        <div id="golden-found">Golden Corn Dogs: 0</div>
+        <div id="boss-kills">Boss Kills: 0</div>
+      </div>
     </div>
+    
+    <img src="corn-dog-reaper.gif" id="reaper" alt="Corn Dog Reaper">
+    
+    <div id="shop">
+      <div class="shop-tabs">
+        <button class="tab-btn active" data-tab="upgrades">Upgrades</button>
+        <button class="tab-btn" data-tab="achievements">Achievements</button>
+        <button class="tab-btn" data-tab="stats">Statistics</button>
+      </div>
+      <div class="shop-content active" id="upgrades">
+        <!-- Filled by updateUI() -->
+      </div>
+      <div class="shop-content" id="achievements">
+        <!-- Filled by updateAchievements() -->
+      </div>
+      <div class="shop-content" id="stats">
+        <div class="stat-entry">Time Played: <span id="time-played">0:00</span></div>
+        <div class="stat-entry">Total Clicks: <span id="total-clicks">0</span></div>
+        <div class="stat-entry">Max Combo: <span id="max-combo">0</span></div>
+        <div class="stat-entry">Golden Corn Dogs: <span id="golden-total">0</span></div>
+      </div>
+    </div>
+
+    <div id="leaderboard"></div>
+
+    <button id="prestige-btn" class="prestige-button" onclick="prestige()">
+      Prestige (Requires 1M Corn Dogs)
+    </button>
   </div>
 
   <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/minecraft-pop.mp3" preload="auto"></audio>
