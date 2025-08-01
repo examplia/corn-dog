@@ -12,7 +12,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
@@ -36,13 +36,14 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     
-    // Set persistence to LOCAL to keep the user logged in
-    import { browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // Enable debug logging
+    auth.useDeviceLanguage();
     
     // Set auth persistence to local
     setPersistence(auth, browserLocalPersistence)
       .catch((error) => {
         console.error("Auth persistence error:", error);
+        alert("Failed to enable login persistence. You may need to log in again after refreshing.");
       });
 
     let userId = null;
@@ -100,10 +101,12 @@
       submitBtn.disabled = true;
 
       try {
+        console.log('Attempting to sign in with:', username + '@corndogs.game');
         // First try to sign in
         await signInWithEmailAndPassword(auth, username + '@corndogs.game', password);
+        console.log('Login successful!');
       } catch (error) {
-        console.log('Login attempt:', error.code);
+        console.log('Login attempt error:', error.code, error.message);
         
         // If user doesn't exist or credentials invalid, try to register
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
