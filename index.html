@@ -65,19 +65,63 @@
       e.preventDefault();
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
+      
+      // Show loading state
+      const submitBtn = document.querySelector('#loginForm button');
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Loading...';
+      submitBtn.disabled = true;
+
       try {
         await signInWithEmailAndPassword(auth, username + '@corndogs.game', password);
       } catch (error) {
+        console.log('Login error:', error.code); // For debugging
         if (error.code === 'auth/user-not-found') {
           // If user doesn't exist, create a new account
           try {
             await createUserWithEmailAndPassword(auth, username + '@corndogs.game', password);
           } catch (createError) {
-            alert('Error creating account: ' + createError.message);
+            console.log('Create account error:', createError.code); // For debugging
+            let errorMessage = 'Error creating account: ';
+            switch(createError.code) {
+              case 'auth/email-already-in-use':
+                errorMessage += 'Username already taken';
+                break;
+              case 'auth/invalid-email':
+                errorMessage += 'Invalid username';
+                break;
+              case 'auth/operation-not-allowed':
+                errorMessage += 'Email/Password sign up is not enabled. Please contact the developer.';
+                break;
+              case 'auth/weak-password':
+                errorMessage += 'Password should be at least 6 characters';
+                break;
+              default:
+                errorMessage += createError.message;
+            }
+            alert(errorMessage);
           }
         } else {
-          alert('Error logging in: ' + error.message);
+          let errorMessage = 'Error logging in: ';
+          switch(error.code) {
+            case 'auth/wrong-password':
+              errorMessage += 'Invalid password';
+              break;
+            case 'auth/invalid-email':
+              errorMessage += 'Invalid username';
+              break;
+            case 'auth/configuration-not-found':
+              errorMessage += 'Authentication not set up. Please enable Email/Password authentication in Firebase Console.';
+              break;
+            default:
+              errorMessage += error.message;
+          }
+          alert(errorMessage);
         }
+      } finally {
+        // Reset button state
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
       }
     }
 
