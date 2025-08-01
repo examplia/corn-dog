@@ -66,13 +66,16 @@
 
     function handleAuth(user) {
       if (user) {
+        console.log('User authenticated:', user.uid);
         userId = user.uid;
         showGameUI();
         if (!gameStarted) {
+          console.log('Starting new game...');
           startGame();
           gameStarted = true;
         }
       } else {
+        console.log('No user authenticated, showing login UI');
         showLoginUI();
       }
     }
@@ -652,13 +655,21 @@
       }
 
       function startGame() {
+        console.log('Starting game...');
         loadData().then(() => {
+          console.log('Data loaded, starting spawn interval...');
+          if (spawnInterval) {
+            clearInterval(spawnInterval);
+          }
           spawnInterval = setInterval(spawnCornDog, 1200);
+          console.log('Spawn interval started');
           setInterval(startRandomEvent, 60000); // Check for random events every minute
           setInterval(() => { 
             timePlayedSeconds++; 
             checkDailyChallenges();
           }, 1000);
+        }).catch(error => {
+          console.error('Error starting game:', error);
         });
       }
     });
