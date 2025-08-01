@@ -483,81 +483,7 @@
         setTimeout(() => float.remove(), 1000);
       }
 
-      function spawnBoss() {
-        if (currentBoss) return;
-        const bossIndex = Math.min(Math.floor(count / 1000), BOSSES.length - 1);
-        currentBoss = { ...BOSSES[bossIndex] };
-        bossHealth = currentBoss.health;
-        
-        const boss = document.createElement("div");
-        boss.className = "boss";
-        boss.innerHTML = `
-          <div class="boss-health">
-            <div class="health-bar" style="width: 100%"></div>
-          </div>
-          <div class="boss-image">${currentBoss.image}</div>
-          <div class="boss-name">${currentBoss.name}</div>
-        `;
-        boss.style.top = "50%";
-        boss.style.left = "50%";
-        boss.style.transform = `translate(-50%, -50%) scale(${currentBoss.scale})`;
-        document.body.appendChild(boss);
-        
-        boss.addEventListener("click", async (e) => {
-          const damage = multiplier * (Math.random() < 0.1 ? 2 : 1); // 10% crit chance
-          bossHealth -= damage;
-          const healthPercent = (bossHealth / currentBoss.health) * 100;
-          boss.querySelector(".health-bar").style.width = `${Math.max(0, healthPercent)}%`;
-          
-          spawnFloatingText(e.pageX, e.pageY, damage * 2 === multiplier ? "CRIT!" : `${damage}`);
-          
-          if (bossHealth <= 0) {
-            money += currentBoss.reward;
-            spawnFloatingText(e.pageX, e.pageY - 30, `+$${currentBoss.reward}!`);
-            boss.remove();
-            currentBoss = null;
-            updateUI();
-            await saveData();
-          }
-        });
-      }
-
-      function spawnCornDog() {
-        if (Math.random() < 0.05 && count >= 1000) { // 5% chance to spawn boss after 1000 corn dogs
-          spawnBoss();
-          return;
-        }
-
-        const corndog = document.createElement("div");
-        corndog.className = "corndog";
-        corndog.textContent = "🌭";
-        corndog.style.top = Math.random() * (window.innerHeight - 50) + "px";
-        corndog.style.left = Math.random() * (window.innerWidth - 50) + "px";
-        document.body.appendChild(corndog);
-
-        const spawnSound = document.getElementById("spawnSound");
-        spawnSound.currentTime = 0;
-        try {
-          spawnSound.play().catch(() => {}); // Ignore autoplay blocking
-        } catch (e) {}
-
-        corndog.addEventListener("click", async (e) => {
-          const clickValue = multiplier * (Math.random() < 0.1 ? 2 : 1); // 10% crit chance
-          count += clickValue;
-          money += clickValue;
-          updateUI();
-          try {
-            document.getElementById("eatSound").play().catch(() => {});
-          } catch (e) {}
-          spawnFloatingText(e.pageX, e.pageY, clickValue === multiplier * 2 ? "CRIT!" : `+${clickValue}`);
-          corndog.remove();
-          await saveData();
-        });
-
-        setTimeout(() => {
-          if (document.body.contains(corndog)) corndog.remove();
-        }, 8000);
-      }
+      // These functions are defined earlier in the code
 
       // Event listeners are now handled in updateUI() function
 
@@ -705,21 +631,49 @@
       // Initialize DOM elements and attach event listeners
       document.addEventListener("DOMContentLoaded", () => {
         console.log('DOM Content Loaded');
+        
+        // Initialize all UI elements first
+        counterElem = document.getElementById("counter");
+        moneyElem = document.getElementById("money");
+        dpsElem = document.getElementById("dps");
+
         // Setup login form handler
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
           loginForm.addEventListener('submit', handleLogin);
           console.log('Login form handler attached');
         }
-
-        // Setup game UI elements
-        counterElem = document.getElementById("counter");
-        moneyElem = document.getElementById("money");
-        dpsElem = document.getElementById("dps");
         
+        // Setup game UI elements
         const prestigeBtn = document.getElementById('prestige-btn');
         if (prestigeBtn) {
           prestigeBtn.addEventListener('click', handlePrestige);
+        }
+
+        // Setup shop tabs
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.shop-content').forEach(content => {
+              content.classList.remove('active');
+            });
+            document.getElementById(btn.dataset.tab).classList.add('active');
+          });
+        });
+
+        // Initialize game state if user is already logged in
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          userId = currentUser.uid;
+          showGameUI();
+          if (!gameStarted) {
+            startGame();
+            gameStarted = true;
+          }
+        } else {
+          showLoginUI();
         }
       });
   </script>
