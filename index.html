@@ -64,6 +64,25 @@
       if (loginUI) loginUI.style.display = 'none';
     }
 
+    function startGame() {
+      console.log('Starting game...');
+      loadData().then(() => {
+        console.log('Data loaded, starting spawn interval...');
+        if (spawnInterval) {
+          clearInterval(spawnInterval);
+        }
+        spawnInterval = setInterval(spawnCornDog, 1200);
+        console.log('Spawn interval started');
+        setInterval(startRandomEvent, 60000); // Check for random events every minute
+        setInterval(() => { 
+          timePlayedSeconds++; 
+          checkDailyChallenges();
+        }, 1000);
+      }).catch(error => {
+        console.error('Error starting game:', error);
+      });
+    }
+
     function handleAuth(user) {
       if (user) {
         console.log('User authenticated:', user.uid);
@@ -190,23 +209,31 @@
       }
     }
 
+      // Initialize DOM elements
+      let counterElem, moneyElem, dpsElem, buyMultBtn, buyAutoBtn;
+
       document.addEventListener("DOMContentLoaded", () => {
-      console.log('DOM Content Loaded');
-      // Setup login form handler
-      const loginForm = document.getElementById('loginForm');
-      if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-        console.log('Login form handler attached');
-      }
-      const prestigeBtn = document.getElementById('prestige-btn');
-      if (prestigeBtn) {
-        prestigeBtn.addEventListener('click', handlePrestige);
-      }
-      const counterElem = document.getElementById("counter");
-      const moneyElem = document.getElementById("money");
-      const dpsElem = document.getElementById("dps");
-      const buyMultBtn = document.getElementById("buy-mult");
-      const buyAutoBtn = document.getElementById("buy-auto");
+        console.log('DOM Content Loaded');
+        // Setup login form handler
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+          loginForm.addEventListener('submit', handleLogin);
+          console.log('Login form handler attached');
+        }
+
+        // Setup game UI elements
+        counterElem = document.getElementById("counter");
+        moneyElem = document.getElementById("money");
+        dpsElem = document.getElementById("dps");
+        
+        const prestigeBtn = document.getElementById('prestige-btn');
+        if (prestigeBtn) {
+          prestigeBtn.addEventListener('click', handlePrestige);
+        }
+
+        // These will be reattached in updateUI()
+        buyMultBtn = document.getElementById("buy-mult");
+        buyAutoBtn = document.getElementById("buy-auto");
       
       // Constants
       const PRESTIGE_COST = 1000000;
@@ -658,24 +685,7 @@
         }
       }
 
-      function startGame() {
-        console.log('Starting game...');
-        loadData().then(() => {
-          console.log('Data loaded, starting spawn interval...');
-          if (spawnInterval) {
-            clearInterval(spawnInterval);
-          }
-          spawnInterval = setInterval(spawnCornDog, 1200);
-          console.log('Spawn interval started');
-          setInterval(startRandomEvent, 60000); // Check for random events every minute
-          setInterval(() => { 
-            timePlayedSeconds++; 
-            checkDailyChallenges();
-          }, 1000);
-        }).catch(error => {
-          console.error('Error starting game:', error);
-        });
-      }
+      // Functions have been moved outside DOMContentLoaded
     });
   </script>
   <style>
