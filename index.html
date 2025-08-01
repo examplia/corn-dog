@@ -386,23 +386,6 @@
         multiClick: { base: 3000, scale: 3, name: "Multi-Click", maxLevel: 5 }
       };
 
-      async function loadData() {
-        const docRef = doc(db, "users", userId);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          count = data.count || 0;
-          money = data.money || 0;
-          multiplier = data.multiplier || 1;
-          autoClickers = data.autoClickers || 0;
-          upgradeLevel = data.upgradeLevel || 1;
-          passiveIncome = data.passiveIncome || 0;
-          prestigeLevel = data.prestigeLevel || 0;
-          prestigeMultiplier = 1 + (prestigeLevel * 0.5);
-        }
-        updateUI();
-      }
-
       async function saveData() {
         const username = auth.currentUser.email.split('@')[0];
         await setDoc(doc(db, "users", userId), {
