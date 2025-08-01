@@ -82,6 +82,33 @@
 
     onAuthStateChanged(auth, handleAuth);
 
+    // Game state variables
+    let count = 0;
+    let money = 0;
+    let multiplier = 1;
+    let autoClickers = 0;
+    let bossHealth = 0;
+    let currentBoss = null;
+    let upgradeLevel = 1;
+    let passiveIncome = 0;
+    let prestigeLevel = 0;
+    let prestigeMultiplier = 1;
+    let critChance = 0.1;
+    let critMultiplier = 2;
+    let comboCount = 0;
+    let maxCombo = 0;
+    let achievements = {};
+    let goldenCornDogChance = 0.01;
+    let lastClickTime = 0;
+    let clicksPerSecond = 0;
+    let totalClicks = 0;
+    let bossKills = 0;
+    let goldenCornDogsFound = 0;
+    let timePlayedSeconds = 0;
+    let spawnInterval;
+    let dailyProgress = {};
+    let lastDailyReset = 0;
+
     async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('username').value.trim();
@@ -164,10 +191,12 @@
     }
 
       document.addEventListener("DOMContentLoaded", () => {
+      console.log('DOM Content Loaded');
       // Setup login form handler
       const loginForm = document.getElementById('loginForm');
       if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
+        console.log('Login form handler attached');
       }
       const prestigeBtn = document.getElementById('prestige-btn');
       if (prestigeBtn) {
@@ -177,29 +206,7 @@
       const moneyElem = document.getElementById("money");
       const dpsElem = document.getElementById("dps");
       const buyMultBtn = document.getElementById("buy-mult");
-      const buyAutoBtn = document.getElementById("buy-auto");      // Game state
-      let count = 0;
-      let money = 0;
-      let multiplier = 1;
-      let autoClickers = 0;
-      let bossHealth = 0;
-      let currentBoss = null;
-      let upgradeLevel = 1;
-      let passiveIncome = 0;
-      let prestigeLevel = 0;
-      let prestigeMultiplier = 1;
-      let critChance = 0.1;
-      let critMultiplier = 2;
-      let comboCount = 0;
-      let maxCombo = 0;
-      let achievements = {};
-      let goldenCornDogChance = 0.01;
-      let lastClickTime = 0;
-      let clicksPerSecond = 0;
-      let totalClicks = 0;
-      let bossKills = 0;
-      let goldenCornDogsFound = 0;
-      let timePlayedSeconds = 0;
+      const buyAutoBtn = document.getElementById("buy-auto");
       
       // Constants
       const PRESTIGE_COST = 1000000;
@@ -633,7 +640,7 @@
         }
       }
 
-      let spawnInterval;
+      // Constants
       const DAILY_CHALLENGES = [
         { id: 'speed', name: 'Speed Demon', desc: 'Click 1000 times in 5 minutes', reward: 10000 },
         { id: 'combo', name: 'Combo King', desc: 'Get a 50x combo', reward: 15000 },
@@ -641,9 +648,6 @@
         { id: 'golden', name: 'Golden Rush', desc: 'Find 3 golden corn dogs', reward: 25000 },
         { id: 'perfect', name: 'Perfect Run', desc: 'Play for 10 minutes without missing a corn dog', reward: 30000 }
       ];
-
-      let dailyProgress = {};
-      let lastDailyReset = 0;
 
       function checkDailyChallenges() {
         const now = new Date();
