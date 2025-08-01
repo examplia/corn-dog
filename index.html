@@ -167,12 +167,16 @@
         clicks: [
           { id: 'click1', name: '100 Clicks', req: 100, reward: 50 },
           { id: 'click2', name: '1,000 Clicks', req: 1000, reward: 500 },
-          { id: 'click3', name: '10,000 Clicks', req: 10000, reward: 5000 }
+          { id: 'click3', name: '10,000 Clicks', req: 10000, reward: 5000 },
+          { id: 'click4', name: '100,000 Clicks', req: 100000, reward: 50000 },
+          { id: 'click5', name: '1,000,000 Clicks', req: 1000000, reward: 500000 }
         ],
         corndogs: [
           { id: 'dogs1', name: 'Corn Dog Novice', req: 1000, reward: 100 },
           { id: 'dogs2', name: 'Corn Dog Expert', req: 10000, reward: 1000 },
-          { id: 'dogs3', name: 'Corn Dog Master', req: 100000, reward: 10000 }
+          { id: 'dogs3', name: 'Corn Dog Master', req: 100000, reward: 10000 },
+          { id: 'dogs4', name: 'Corn Dog Legend', req: 1000000, reward: 100000 },
+          { id: 'dogs5', name: 'Corn Dog God', req: 10000000, reward: 1000000 }
         ],
         bosses: [
           { id: 'boss1', name: 'Boss Slayer', req: 1, reward: 1000 },
@@ -189,21 +193,35 @@
       const SPECIAL_EVENTS = [
         { name: "Corn Dog Rain", duration: 10000, spawnRate: 300 },
         { name: "Boss Rush", duration: 30000, bossOnly: true },
-        { name: "Golden Hour", duration: 60000, goldenChance: 0.1 }
+        { name: "Golden Hour", duration: 60000, goldenChance: 0.1 },
+        { name: "Summer BBQ", duration: 30000, clickMultiplier: 2, theme: "summer" },
+        { name: "Halloween Feast", duration: 30000, spawnRate: 500, theme: "halloween" },
+        { name: "Winter Festival", duration: 30000, goldenChance: 0.2, theme: "winter" },
+        { name: "Double DPS", duration: 20000, dpsMultiplier: 2 }
       ];
       
       const BOSSES = [
-        { name: "Mega Corn Dog", health: 100, reward: 500, image: "🌭", scale: 2 },
-        { name: "Mustard King", health: 500, reward: 2000, image: "👑", scale: 2.5 },
-        { name: "Deep Fryer Boss", health: 2000, reward: 10000, image: "🔥", scale: 3 },
-        { name: "Corn Dog Reaper", health: 10000, reward: 50000, image: "💀", scale: 4 }
+        { name: "Mega Corn Dog", health: 100, reward: 500, image: "🌭", scale: 2, abilities: [] },
+        { name: "Mustard King", health: 500, reward: 2000, image: "👑", scale: 2.5, abilities: ["splash"] },
+        { name: "Deep Fryer Boss", health: 2000, reward: 10000, image: "🔥", scale: 3, abilities: ["burn"] },
+        { name: "Corn Dog Reaper", health: 10000, reward: 50000, image: "💀", scale: 4, abilities: ["summon"] },
+        { name: "Ketchup Queen", health: 5000, reward: 25000, image: "👸", scale: 3, abilities: ["heal"] },
+        { name: "Robot Dog-3000", health: 15000, reward: 75000, image: "🤖", scale: 4, abilities: ["shield"] },
+        { name: "The Carnival Master", health: 20000, reward: 100000, image: "🎪", scale: 4, abilities: ["multiply"] },
+        { name: "Ancient Corn Spirit", health: 50000, reward: 250000, image: "👻", scale: 5, abilities: ["all"] }
       ];
       
       const UPGRADES = {
-        autoClicker: { base: 100, scale: 1.5, name: "Auto-Eater" },
-        multiplier: { base: 50, scale: 2, name: "Click Power" },
-        passive: { base: 200, scale: 2, name: "Passive Income" },
-        critical: { base: 300, scale: 2.5, name: "Critical Hits" }
+        autoClicker: { base: 100, scale: 1.5, name: "Auto-Eater", maxLevel: 100 },
+        multiplier: { base: 50, scale: 2, name: "Click Power", maxLevel: 50 },
+        passive: { base: 200, scale: 2, name: "Passive Income", maxLevel: 50 },
+        critical: { base: 300, scale: 2.5, name: "Critical Hits", maxLevel: 25 },
+        combo: { base: 400, scale: 2, name: "Combo Master", maxLevel: 10 },
+        luck: { base: 500, scale: 2, name: "Lucky Strikes", maxLevel: 10 },
+        magnet: { base: 600, scale: 2, name: "Corn Dog Magnet", maxLevel: 5 },
+        golden: { base: 1000, scale: 3, name: "Golden Touch", maxLevel: 5 },
+        timeWarp: { base: 2000, scale: 3, name: "Time Warper", maxLevel: 3 },
+        multiClick: { base: 3000, scale: 3, name: "Multi-Click", maxLevel: 5 }
       };
 
       async function loadData() {
@@ -573,11 +591,34 @@
       }
 
       let spawnInterval;
+      const DAILY_CHALLENGES = [
+        { id: 'speed', name: 'Speed Demon', desc: 'Click 1000 times in 5 minutes', reward: 10000 },
+        { id: 'combo', name: 'Combo King', desc: 'Get a 50x combo', reward: 15000 },
+        { id: 'boss', name: 'Boss Hunter', desc: 'Defeat 5 bosses', reward: 20000 },
+        { id: 'golden', name: 'Golden Rush', desc: 'Find 3 golden corn dogs', reward: 25000 },
+        { id: 'perfect', name: 'Perfect Run', desc: 'Play for 10 minutes without missing a corn dog', reward: 30000 }
+      ];
+
+      let dailyProgress = {};
+      let lastDailyReset = 0;
+
+      function checkDailyChallenges() {
+        const now = new Date();
+        if (now.getTime() - lastDailyReset > 24 * 60 * 60 * 1000) {
+          dailyProgress = {};
+          lastDailyReset = now.getTime();
+          alert('New daily challenges available!');
+        }
+      }
+
       function startGame() {
         loadData().then(() => {
           spawnInterval = setInterval(spawnCornDog, 1200);
           setInterval(startRandomEvent, 60000); // Check for random events every minute
-          setInterval(() => { timePlayedSeconds++; }, 1000);
+          setInterval(() => { 
+            timePlayedSeconds++; 
+            checkDailyChallenges();
+          }, 1000);
         });
       }
     });
