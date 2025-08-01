@@ -13,6 +13,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyChqD_9j3np8jnrM4BXDnhrRl4r52TamZk",
@@ -25,14 +26,64 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    let userId = localStorage.getItem("corndog_uid");
-    if (!userId) {
-      userId = crypto.randomUUID();
-      localStorage.setItem("corndog_uid", userId);
+    let userId = null;
+    let gameStarted = false;
+
+    // Login system
+    function showLoginUI() {
+      const gameContent = document.getElementById('gameContent');
+      const loginUI = document.getElementById('loginUI');
+      if (gameContent) gameContent.style.display = 'none';
+      if (loginUI) loginUI.style.display = 'block';
+    }
+
+    function showGameUI() {
+      const gameContent = document.getElementById('gameContent');
+      const loginUI = document.getElementById('loginUI');
+      if (gameContent) gameContent.style.display = 'block';
+      if (loginUI) loginUI.style.display = 'none';
+    }
+
+    function handleAuth(user) {
+      if (user) {
+        userId = user.uid;
+        showGameUI();
+        if (!gameStarted) {
+          startGame();
+          gameStarted = true;
+        }
+      } else {
+        showLoginUI();
+      }
+    }
+
+    onAuthStateChanged(auth, handleAuth);
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, username + '@corndogs.game', password);
+      } catch (error) {
+        if (error.code === 'auth/user-not-found') {
+          // If user doesn't exist, create a new account
+          try {
+            await createUserWithEmailAndPassword(auth, username + '@corndogs.game', password);
+          } catch (createError) {
+            alert('Error creating account: ' + createError.message);
+          }
+        } else {
+          alert('Error logging in: ' + error.message);
+        }
+      }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      // Setup login form handler
+      document.getElementById('loginForm').addEventListener('submit', handleLogin);
       const counterElem = document.getElementById("counter");
       const moneyElem = document.getElementById("money");
       const dpsElem = document.getElementById("dps");
@@ -278,9 +329,11 @@
         }
       }, 1000);
 
-      loadData().then(() => {
-        setInterval(spawnCornDog, 1200);
-      });
+      function startGame() {
+        loadData().then(() => {
+          setInterval(spawnCornDog, 1200);
+        });
+      }
     });
   </script>
   <style>
@@ -396,6 +449,47 @@
       font-size: 1.5rem;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
+    .login-container {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #ffcc00;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+      max-width: 400px;
+      margin: 2rem auto;
+    }
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .login-form input {
+      padding: 10px;
+      border: 2px solid #ffcc00;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    .login-form input::placeholder {
+      color: rgba(255, 204, 0, 0.5);
+    }
+    .login-form button {
+      background: linear-gradient(to bottom, #ffcc00, #ff9900);
+      border: none;
+      padding: 15px;
+      color: black;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: Impact, sans-serif;
+      font-size: 1.2rem;
+      transition: transform 0.2s, filter 0.2s;
+    }
+    .login-form button:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
     #reaper {
       max-width: 90%;
       height: auto;
@@ -406,14 +500,28 @@
   </style>
 </head>
 <body>
-  <h1>Today I Will Eat Five Corn Dogs</h1>
-  <img src="corn-dog-reaper.gif" id="reaper" alt="Corn Dog Reaper">
-  <div id="counter">Corn Dogs Eaten: 0</div>
-  <div id="money">Money: $0</div>
-  <div id="dps">Auto-Eaters: 0/s</div>
-  <div id="shop">
-    <button id="buy-mult">Upgrade Click (+1) — $cost</button>
-    <button id="buy-auto">Buy Auto-Eater — $cost</button>
+  <div id="loginUI">
+    <h1>Today I Will Eat Five Corn Dogs</h1>
+    <div class="login-container">
+      <h2>Login or Register</h2>
+      <form id="loginForm" class="login-form">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Play Game</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="gameContent" style="display: none;">
+    <h1>Today I Will Eat Five Corn Dogs</h1>
+    <img src="corn-dog-reaper.gif" id="reaper" alt="Corn Dog Reaper">
+    <div id="counter">Corn Dogs Eaten: 0</div>
+    <div id="money">Money: $0</div>
+    <div id="dps">Auto-Eaters: 0/s</div>
+    <div id="shop">
+      <button id="buy-mult">Upgrade Click (+1) — $cost</button>
+      <button id="buy-auto">Buy Auto-Eater — $cost</button>
+    </div>
   </div>
 
   <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/minecraft-pop.mp3" preload="auto"></audio>
