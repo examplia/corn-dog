@@ -8,7 +8,7 @@
   <!-- Discord Embed -->
   <meta property="og:title" content="Today I Will Eat Five Corn Dogs">
   <meta property="og:description" content="Join the corn dog reaper on his noble mission.">
-  <meta property="og:image" content="https://iwilleatcorndogs.today//corn-dog-reaper.gif">
+  <meta property="og:image" content="https://iwilleatcorndogs.today/corn-dog-reaper.gif">
   <meta property="og:url" content="https://iwilleatcorndogs.today/">
   <meta name="twitter:card" content="summary_large_image">
 
@@ -53,10 +53,17 @@
       color: #ffcc00;
     }
 
-    .notif {
+    #notif-container {
       position: fixed;
       bottom: 20px;
       left: 20px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .notif {
       background: rgba(255, 255, 255, 0.1);
       color: white;
       padding: 10px 15px;
@@ -98,7 +105,9 @@
   <button id="eatButton">🌭 I ate one!</button>
   <div id="counter">Corn Dogs Eaten: 0</div>
 
-   <div id="jumpscare">
+  <div id="notif-container"></div>
+
+  <div id="jumpscare">
     <img src="tenor.gif" alt="Jumpscare">
     <audio id="scream" src="https://www.myinstants.com/media/sounds/scream.mp3" preload="auto"></audio>
   </div>
@@ -109,6 +118,7 @@
     const eatButton = document.getElementById('eatButton');
     const jumpscare = document.getElementById('jumpscare');
     const scream = document.getElementById('scream');
+    const notifContainer = document.getElementById('notif-container');
 
     eatButton.addEventListener('click', () => {
       count++;
@@ -125,14 +135,23 @@
     });
 
     // Fake notifications
-    const names = ["alex", "morgan", "sludge", "reaper420", "corny", "uwuDogLover", "SomeQidiot", "FAKEAXIS", "Krabs", "FrappyMC", "Loimology"];
+const names = [
+  "FAKEAXIS", "Krabs", "Flanker", "Mechanic", "Adamizer8Pro", "Agro",
+  "Pirovideo", "the identity o...", "TremblingAspe...", "Loimology",
+  "Neuroii", "Onionsu", "blox", "Blockhead.exe", "50 people",
+  "alyssa", "ame", "DocSlay", "Gary", "not a mod",
+  "snkerpickles", "Alixiiann", "ConeDealer", "drainfun",
+  "Fishy! | Doct...", "GrubFub9", "Hatty", "ian mcg...",
+  "Invest in Azer...", "John Co...", "kris", "Lag", "Lil27N1sh",
+  "oxywyozz", "Ronn \"Underscore\""
+];
     setInterval(() => {
       const notif = document.createElement('div');
       notif.className = 'notif';
       const name = names[Math.floor(Math.random() * names.length)];
       const score = Math.floor(Math.random() * 500) + 50;
       notif.textContent = `${name} just ate ${score} corn dogs! 🌭`;
-      document.body.appendChild(notif);
+      notifContainer.appendChild(notif);
       setTimeout(() => notif.remove(), 6000);
     }, 2500);
   </script>
