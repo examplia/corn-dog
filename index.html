@@ -64,6 +64,114 @@
       if (loginUI) loginUI.style.display = 'none';
     }
 
+    // Game functions
+    function updateUI() {
+      if (!counterElem) {
+        counterElem = document.getElementById("counter");
+        moneyElem = document.getElementById("money");
+        dpsElem = document.getElementById("dps");
+      }
+      
+      if (counterElem) counterElem.textContent = `Corn Dogs Eaten: ${count}`;
+      if (moneyElem) moneyElem.textContent = `Money: $${money}`;
+      if (dpsElem) dpsElem.textContent = `DPS: ${autoClickers + passiveIncome}/s`;
+      
+      // Update shop buttons
+      const shop = document.getElementById("shop");
+      if (shop) {
+        shop.innerHTML = `
+          <div class="upgrade">
+            <button id="buy-mult">
+              <span class="upgrade-name">${UPGRADES.multiplier.name}</span>
+              <span class="upgrade-desc">Current: ${multiplier}x</span>
+              <span class="upgrade-cost">$${Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1))}</span>
+            </button>
+          </div>
+          <div class="upgrade">
+            <button id="buy-auto">
+              <span class="upgrade-name">${UPGRADES.autoClicker.name}</span>
+              <span class="upgrade-desc">Current: ${autoClickers}/s</span>
+              <span class="upgrade-cost">$${Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers))}</span>
+            </button>
+          </div>
+          <div class="upgrade">
+            <button id="buy-passive">
+              <span class="upgrade-name">${UPGRADES.passive.name}</span>
+              <span class="upgrade-desc">Current: ${passiveIncome}/s</span>
+              <span class="upgrade-cost">$${Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome))}</span>
+            </button>
+          </div>
+        `;
+        
+        // Reattach event listeners
+        const buyMultBtn = document.getElementById("buy-mult");
+        const buyAutoBtn = document.getElementById("buy-auto");
+        const buyPassiveBtn = document.getElementById("buy-passive");
+        
+        if (buyMultBtn) buyMultBtn.addEventListener("click", handleUpgrade("multiplier"));
+        if (buyAutoBtn) buyAutoBtn.addEventListener("click", handleUpgrade("autoClicker"));
+        if (buyPassiveBtn) buyPassiveBtn.addEventListener("click", handleUpgrade("passive"));
+      }
+    }
+
+    async function loadData() {
+      console.log('Loading data...');
+      const docRef = doc(db, "users", userId);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        count = data.count || 0;
+        money = data.money || 0;
+        multiplier = data.multiplier || 1;
+        autoClickers = data.autoClickers || 0;
+        upgradeLevel = data.upgradeLevel || 1;
+        passiveIncome = data.passiveIncome || 0;
+        prestigeLevel = data.prestigeLevel || 0;
+        prestigeMultiplier = 1 + (prestigeLevel * 0.5);
+      }
+      updateUI();
+    }
+
+    function spawnCornDog() {
+      console.log('Spawning corn dog...');
+      if (Math.random() < 0.05 && count >= 1000) { // 5% chance to spawn boss after 1000 corn dogs
+        spawnBoss();
+        return;
+      }
+
+      const corndog = document.createElement("div");
+      corndog.className = "corndog";
+      corndog.textContent = "🌭";
+      corndog.style.top = Math.random() * (window.innerHeight - 50) + "px";
+      corndog.style.left = Math.random() * (window.innerWidth - 50) + "px";
+      document.body.appendChild(corndog);
+
+      const spawnSound = document.getElementById("spawnSound");
+      if (spawnSound) {
+        spawnSound.currentTime = 0;
+        try {
+          spawnSound.play().catch(() => {}); // Ignore autoplay blocking
+        } catch (e) {}
+      }
+
+      corndog.addEventListener("click", async (e) => {
+        const clickValue = multiplier * (Math.random() < 0.1 ? 2 : 1); // 10% crit chance
+        count += clickValue;
+        money += clickValue;
+        updateUI();
+        try {
+          document.getElementById("eatSound")?.play().catch(() => {});
+        } catch (e) {}
+        spawnFloatingText(e.pageX, e.pageY, clickValue === multiplier * 2 ? "CRIT!" : `+${clickValue}`);
+        corndog.remove();
+        await saveData();
+      });
+
+      setTimeout(() => {
+        if (document.body.contains(corndog)) corndog.remove();
+      }, 8000);
+    }
+
     function startGame() {
       console.log('Starting game...');
       loadData().then(() => {
