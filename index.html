@@ -23,10 +23,27 @@
       messagingSenderId: "824338629929",
       appId: "1:824338629929:web:8d49dd2b7923bf41976338"
     };
+    
+    // Add authorized domains
+    const authorizedDomains = [
+      'iwilleatcorndogs.today',
+      'www.iwilleatcorndogs.today',
+      'localhost',
+      'corn-dog-clicker.firebaseapp.com'
+    ];
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    
+    // Set persistence to LOCAL to keep the user logged in
+    import { browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
+    // Set auth persistence to local
+    setPersistence(auth, browserLocalPersistence)
+      .catch((error) => {
+        console.error("Auth persistence error:", error);
+      });
 
     let userId = null;
     let gameStarted = false;
@@ -125,16 +142,15 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", () => {
       // Setup login form handler
       document.getElementById('loginForm').addEventListener('submit', handleLogin);
+      document.getElementById('prestige-btn').addEventListener('click', handlePrestige);
       const counterElem = document.getElementById("counter");
       const moneyElem = document.getElementById("money");
       const dpsElem = document.getElementById("dps");
       const buyMultBtn = document.getElementById("buy-mult");
-      const buyAutoBtn = document.getElementById("buy-auto");
-
-      // Game state
+      const buyAutoBtn = document.getElementById("buy-auto");      // Game state
       let count = 0;
       let money = 0;
       let multiplier = 1;
@@ -968,7 +984,7 @@
 
     <div id="leaderboard"></div>
 
-    <button id="prestige-btn" class="prestige-button" onclick="handlePrestige()">
+    <button id="prestige-btn" class="prestige-button">
       Prestige (Requires 1M Corn Dogs)
     </button>
   </div>
