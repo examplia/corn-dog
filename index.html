@@ -93,8 +93,100 @@
       color: #ffcc00;
     }
     
-    .achievement-desc {
-      font-size: 0.8rem;<!DOCTYPE html>
+    .achievement-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border: 2px solid #ffcc00;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      animation: achievementSlide 4s ease-in-out forwards;
+      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.4);
+      max-width: 300px;
+    }
+    
+    @keyframes achievementSlide {
+      0% { transform: translateX(100%); opacity: 0; }
+      10% { transform: translateX(0); opacity: 1; }
+      90% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .achievement-icon {
+      font-size: 2rem;
+      color: #000;
+    }
+    
+    .achievement-content {
+      flex: 1;
+      color: #000;
+    }
+    
+    .achievement-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .achievement-reward {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    .achievements-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    
+    .achievement-category {
+      margin-bottom: 20px;
+    }
+    
+    .achievement-category h4 {
+      color: #ffcc00;
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
+      padding-bottom: 5px;
+    }
+    
+    .achievement {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    
+    .achievement:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .achievement.unlocked {
+      background: rgba(255, 204, 0, 0.15);
+      border-color: rgba(255, 204, 0, 0.3);
+    }
+    
+    .achievement-info {
+      margin-bottom: 8px;
+    }
+    
+    .achievement-name {
+      font-weight: bold;
+      color: #fff;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    
+    .achievement.unlocked .achievement-name {
+      color: #ffcc00;
+    }<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -218,11 +310,30 @@
               </div>
               <div class="upgrade-details">
                 <span class="upgrade-desc">+${passiveIncome}/s → +${passiveIncome + 1}/s</span>
-                <span class="upgrade-cost">$${numberFormat(Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)))}</span>
+                <span class="upgrade-cost">${numberFormat(Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)))}</span>
               </div>
             </button>
           </div>
+          
+          <div class="auto-upgrade-section">
+            <button class="auto-upgrade-toggle ${autoUpgradeEnabled ? 'active' : ''}" onclick="toggleAutoUpgrade()">
+              🤖 Auto-Upgrade: ${autoUpgradeEnabled ? 'ON' : 'OFF'}
+            </button>
+          </div>
+          
+          ${activePowerUps.length > 0 ? `
+          <div class="active-powerups">
+            <h4>🔥 Active Power-ups</h4>
+            ${activePowerUps.map(p => {
+              const timeLeft = Math.max(0, Math.ceil((p.endTime - Date.now()) / 1000));
+              return `<div class="powerup-status">${p.icon} ${p.effect} (${timeLeft}s)</div>`;
+            }).join('')}
+          </div>
+          ` : ''}
         `;
+        
+        // Make sure toggleAutoUpgrade is available globally
+        window.toggleAutoUpgrade = toggleAutoUpgrade;
         
         // Reattach event listeners
         const buyMultBtn = document.getElementById("buy-mult");
@@ -446,6 +557,23 @@
     let spawnInterval;
     let dailyProgress = {};
     let lastDailyReset = 0;
+    let autoUpgradeEnabled = false;
+    let clickMultiplierChain = 1;
+    let powerUps = [];
+    let lastPowerUpSpawn = 0;
+
+    // New game mechanics
+    const POWER_UPS = [
+      { type: 'speed', icon: '⚡', duration: 10000, effect: 'Double click speed', multiplier: 2 },
+      { type: 'money', icon: '💰', duration: 15000, effect: 'Triple money gain', multiplier: 3 },
+      { type: 'crit', icon: '💢', duration: 12000, effect: '50% crit chance', critBonus: 0.5 },
+      { type: 'magnet', icon: '🧲', duration: 20000, effect: 'Auto-collect corn dogs', autoCollect: true },
+      { type: 'freeze', icon: '❄️', duration: 8000, effect: 'Freeze time (longer spawns)', timeFreeze: true }
+    ];
+
+    let activePowerUps = [];
+    let multiplierChainCount = 0;
+    let lastMultiplierTime = 0;
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -752,14 +880,33 @@
         setTimeout(() => float.remove(), 2000);
       }
 
-      // Auto-clicker and passive income interval
+      // Auto-clicker and passive income interval with stats tracking
       setInterval(() => {
+        timePlayedSeconds++;
+        
         if (autoClickers > 0 || passiveIncome > 0) {
-          const earnings = autoClickers + passiveIncome;
+          let earnings = autoClickers + passiveIncome;
+          
+          // Apply power-up multipliers to auto earnings
+          activePowerUps.forEach(powerUp => {
+            if (powerUp.type === 'money') earnings *= powerUp.multiplier;
+            if (powerUp.type === 'speed') earnings *= powerUp.multiplier;
+          });
+          
           count += earnings;
           money += earnings;
           updateUI();
           if (userId) saveData();
+        }
+        
+        // Update power-ups display every second
+        if (activePowerUps.length > 0) {
+          updateUI();
+        }
+        
+        // Check achievements periodically
+        if (timePlayedSeconds % 5 === 0) {
+          checkAchievements();
         }
       }, 1000);
 
@@ -914,6 +1061,110 @@
         { id: 'golden', name: 'Golden Rush', desc: 'Find 3 golden corn dogs', reward: 25000 },
         { id: 'perfect', name: 'Perfect Run', desc: 'Play for 10 minutes without missing a corn dog', reward: 30000 }
       ];
+
+      // Power-up system
+      function spawnPowerUp() {
+        const powerUp = POWER_UPS[Math.floor(Math.random() * POWER_UPS.length)];
+        const powerUpElem = document.createElement("div");
+        powerUpElem.className = "power-up";
+        powerUpElem.textContent = powerUp.icon;
+        powerUpElem.title = powerUp.effect;
+        
+        const margin = 150;
+        powerUpElem.style.top = (margin + Math.random() * (window.innerHeight - 2 * margin)) + "px";
+        powerUpElem.style.left = (margin + Math.random() * (window.innerWidth - 2 * margin)) + "px";
+        document.body.appendChild(powerUpElem);
+        
+        powerUpElem.addEventListener("click", () => {
+          activatePowerUp(powerUp);
+          powerUpElem.remove();
+        });
+        
+        setTimeout(() => {
+          if (document.body.contains(powerUpElem)) powerUpElem.remove();
+        }, 15000);
+      }
+
+      function activatePowerUp(powerUp) {
+        // Remove existing power-up of same type
+        activePowerUps = activePowerUps.filter(p => p.type !== powerUp.type);
+        
+        const activePowerUp = {
+          ...powerUp,
+          startTime: Date.now(),
+          endTime: Date.now() + powerUp.duration
+        };
+        
+        activePowerUps.push(activePowerUp);
+        
+        // Show power-up notification
+        spawnFloatingText(
+          window.innerWidth / 2,
+          window.innerHeight / 3,
+          `${powerUp.icon} ${powerUp.effect}!`,
+          'powerup'
+        );
+        
+        // Set timeout to remove power-up
+        setTimeout(() => {
+          activePowerUps = activePowerUps.filter(p => p !== activePowerUp);
+          updateUI();
+        }, powerUp.duration);
+        
+        updateUI();
+      }
+
+      function hasActivePowerUp(type) {
+        return activePowerUps.some(p => p.type === type);
+      }
+
+      function getActiveCritBonus() {
+        const critPowerUp = activePowerUps.find(p => p.type === 'crit');
+        return critPowerUp ? critPowerUp.critBonus : 0;
+      }
+
+      // Multiplier chain system
+      function updateMultiplierChain() {
+        const now = Date.now();
+        if (now - lastMultiplierTime < 1000) { // Within 1 second
+          multiplierChainCount++;
+          clickMultiplierChain = Math.min(multiplierChainCount, 10); // Cap at 10x
+          
+          if (clickMultiplierChain >= 5) {
+            showMultiplierChain();
+          }
+        } else {
+          multiplierChainCount = 1;
+          clickMultiplierChain = 1;
+        }
+        lastMultiplierTime = now;
+      }
+
+      function showMultiplierChain() {
+        const chainElem = document.createElement("div");
+        chainElem.className = "multiplier-chain";
+        chainElem.textContent = `${clickMultiplierChain}x CHAIN!`;
+        document.body.appendChild(chainElem);
+        
+        setTimeout(() => {
+          if (document.body.contains(chainElem)) chainElem.remove();
+        }, 1000);
+      }
+
+      // Auto-upgrade system
+      function checkAutoUpgrades() {
+        // Auto-buy cheapest affordable upgrade
+        const upgrades = [
+          { type: 'multiplier', cost: Math.floor(UPGRADES.multiplier.base * Math.pow(UPGRADES.multiplier.scale, multiplier - 1)) },
+          { type: 'autoClicker', cost: Math.floor(UPGRADES.autoClicker.base * Math.pow(UPGRADES.autoClicker.scale, autoClickers)) },
+          { type: 'passive', cost: Math.floor(UPGRADES.passive.base * Math.pow(UPGRADES.passive.scale, passiveIncome)) }
+        ].filter(u => money >= u.cost).sort((a, b) => a.cost - b.cost);
+        
+        if (upgrades.length > 0) {
+          const upgrade = upgrades[0];
+          handleUpgrade(upgrade.type)();
+        }
+      }
 
       function checkDailyChallenges() {
         const now = new Date();
@@ -1152,7 +1403,181 @@
     .floating-boss-reward { color: #4ade80; font-size: 2rem; }
     .floating-achievement { color: #a855f7; font-size: 1.5rem; }
     .floating-prestige { color: #fbbf24; font-size: 2rem; }
-    .floating-combo { color: #06b6d4; }
+    .achievement-desc {
+      font-size: 0.8rem;
+      color: #ccc;
+      margin-bottom: 4px;
+    }
+    
+    .achievement-reward {
+      font-size: 0.8rem;
+      color: #4ade80;
+      font-weight: bold;
+    }
+    
+    .achievement-progress {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffcc00, #ff9900);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+      font-size: 0.7rem;
+      color: #999;
+      min-width: 60px;
+      text-align: right;
+    }
+    
+    .achievement-summary {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255, 204, 0, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 204, 0, 0.3);
+    }
+    
+    .completion-stats {
+      text-align: center;
+    }
+    
+    .completion-text {
+      color: #ffcc00;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .completion-bar {
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    
+    .completion-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffcc00, #ff9900);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+    
+    .leaderboard-empty {
+      text-align: center;
+      color: #999;
+      font-style: italic;
+      padding: 20px;
+    }
+    
+    /* Power-up styles */
+    .power-up {
+      position: absolute;
+      font-size: 1.5rem;
+      cursor: pointer;
+      user-select: none;
+      z-index: 15;
+      animation: powerUpFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    }
+    
+    @keyframes powerUpFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(180deg); }
+    }
+    
+    .power-up:hover {
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 1));
+    }
+    
+    /* Multiplier chain styles */
+    .multiplier-chain {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      font-weight: bold;
+      color: #ff4444;
+      text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+      animation: chainPulse 0.5s ease-out;
+      z-index: 150;
+      pointer-events: none;
+    }
+    
+    @keyframes chainPulse {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    
+    /* Auto-upgrade styles */
+    .auto-upgrade-toggle {
+      background: rgba(255, 204, 0, 0.2);
+      border: 1px solid #ffcc00;
+      color: #ffcc00;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+    
+    .auto-upgrade-toggle.active {
+      background: #ffcc00;
+      color: black;
+    }
+    
+    .auto-upgrade-toggle:hover {
+      background: rgba(255, 204, 0, 0.3);
+    }
+    
+    .floating-powerup { 
+      color: #a855f7; 
+      font-size: 1.8rem; 
+    }
+    
+    .active-powerups {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(168, 85, 247, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    
+    .active-powerups h4 {
+      margin: 0 0 8px 0;
+      color: #a855f7;
+      font-size: 0.9rem;
+    }
+    
+    .powerup-status {
+      font-size: 0.8rem;
+      color: #fff;
+      margin-bottom: 4px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    .auto-upgrade-section {
+      margin-top: 15px;
+      text-align: center;
+    }
     
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
