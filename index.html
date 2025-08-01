@@ -8,8 +8,8 @@
   <!-- Discord Embed -->
   <meta property="og:title" content="Today I Will Eat Five Corn Dogs">
   <meta property="og:description" content="Join the corn dog reaper on his noble mission.">
-  <meta property="og:image" content="https://yourdomain.com/corn-dog-reaper.gif">
-  <meta property="og:url" content="https://yourdomain.com">
+  <meta property="og:image" content="https://iwilleatcorndogs.today//corn-dog-reaper.gif">
+  <meta property="og:url" content="https://iwilleatcorndogs.today/">
   <meta name="twitter:card" content="summary_large_image">
 
   <style>
@@ -98,7 +98,7 @@
   <button id="eatButton">🌭 I ate one!</button>
   <div id="counter">Corn Dogs Eaten: 0</div>
 
-  <div id="jumpscare">
+   <div id="jumpscare">
     <img src="tenor.gif" alt="Jumpscare">
     <audio id="scream" src="https://www.myinstants.com/media/sounds/scream.mp3" preload="auto"></audio>
   </div>
@@ -113,8 +113,10 @@
     eatButton.addEventListener('click', () => {
       count++;
       counter.textContent = `Corn Dogs Eaten: ${count}`;
-      if (count === 100) {
+
+      if (count % 100 === 0) {
         jumpscare.style.display = 'flex';
+        scream.currentTime = 0;
         scream.play();
         setTimeout(() => {
           jumpscare.style.display = 'none';
@@ -132,7 +134,7 @@
       notif.textContent = `${name} just ate ${score} corn dogs! 🌭`;
       document.body.appendChild(notif);
       setTimeout(() => notif.remove(), 6000);
-    }, 7000);
+    }, 2500);
   </script>
 </body>
 </html>
