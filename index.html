@@ -112,8 +112,21 @@
     <audio id="scream" src="https://www.myinstants.com/media/sounds/scream.mp3" preload="auto"></audio>
   </div>
 
-  <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/pop-cat-original-meme_3ObdYkj.mp3" preload="auto"></audio>
-  <audio id="eatSound" src="https://www.myinstants.com/media/sounds/munch-sound-effect.mp3" preload="auto"></audio>
+  <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/minecraft-pop.mp3" preload="auto"></audio>
+  <audio id="eatSound" src="https://www.myinstants.com/media/sounds/minecraft_eat.mp3" preload="auto"></audio>
+  <audio id="reminderSound" src="eat-some-corndogs.mp3" preload="auto"></audio>
+
+  <!-- Add milestone voice lines -->
+  <audio id="milestone-10" src="wow-10.mp3" preload="auto"></audio>
+  <audio id="milestone-20" src="wow-20.mp3" preload="auto"></audio>
+  <audio id="milestone-30" src="wow-30.mp3" preload="auto"></audio>
+  <audio id="milestone-40" src="wow-40.mp3" preload="auto"></audio>
+  <audio id="milestone-50" src="wow-50.mp3" preload="auto"></audio>
+  <audio id="milestone-60" src="wow-60.mp3" preload="auto"></audio>
+  <audio id="milestone-70" src="wow-70.mp3" preload="auto"></audio>
+  <audio id="milestone-80" src="wow-80.mp3" preload="auto"></audio>
+  <audio id="milestone-90" src="wow-90.mp3" preload="auto"></audio>
+  <audio id="milestone-100" src="wow-100.mp3" preload="auto"></audio>
 
   <script>
     let count = 0;
@@ -123,6 +136,21 @@
     const notifContainer = document.getElementById('notif-container');
     const spawnSound = document.getElementById('spawnSound');
     const eatSound = document.getElementById('eatSound');
+    const reminderSound = document.getElementById('reminderSound');
+    let lastClickTime = Date.now();
+
+    const milestoneLines = {
+      10: document.getElementById('milestone-10'),
+      20: document.getElementById('milestone-20'),
+      30: document.getElementById('milestone-30'),
+      40: document.getElementById('milestone-40'),
+      50: document.getElementById('milestone-50'),
+      60: document.getElementById('milestone-60'),
+      70: document.getElementById('milestone-70'),
+      80: document.getElementById('milestone-80'),
+      90: document.getElementById('milestone-90'),
+      100: document.getElementById('milestone-100'),
+    };
 
     function spawnCornDog() {
       const corndog = document.createElement('div');
@@ -140,7 +168,13 @@
         counter.textContent = `Corn Dogs Eaten: ${count}`;
         eatSound.currentTime = 0;
         eatSound.play();
+        lastClickTime = Date.now();
         corndog.remove();
+
+        if (milestoneLines[count]) {
+          milestoneLines[count].currentTime = 0;
+          milestoneLines[count].play();
+        }
 
         if (count % 100 === 0) {
           jumpscare.style.display = 'flex';
@@ -154,16 +188,25 @@
 
       setTimeout(() => {
         if (document.body.contains(corndog)) corndog.remove();
-      }, 8000); // remove after 8 seconds if not clicked
+      }, 8000);
     }
 
     setInterval(spawnCornDog, 1200);
+
+    // Inactivity check every second
+    setInterval(() => {
+      if (Date.now() - lastClickTime > 10000) {
+        reminderSound.currentTime = 0;
+        reminderSound.play();
+        lastClickTime = Date.now(); // reset timer to not spam
+      }
+    }, 1000);
 
     // Fake notifications
     const names = [
       "FAKEAXIS", "Krabs", "Flanker", "Mechanic", "Adamizer8Pro", "Agro",
       "Pirovideo", "the identity o...", "TremblingAspe...", "Loimology",
-      "Neuroii", "Onionsu", "blox", "Blockhead.exe", "50 people",
+      "Neuroii", "Onionsu", "blox", "Blockhead.exe", "oxxywozz",
       "alyssa", "ame", "DocSlay", "Gary", "not a mod",
       "snkerpickles", "Alixiiann", "ConeDealer", "drainfun",
       "Fishy! | Doct...", "GrubFub9", "Hatty", "ian mcg...",
