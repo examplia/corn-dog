@@ -98,6 +98,31 @@
     .corndog:hover {
       transform: scale(1.3);
     }
+
+    #explosion {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #explosion img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(-10px, 5px); }
+      50% { transform: translate(10px, -5px); }
+      75% { transform: translate(-5px, 10px); }
+    }
   </style>
 </head>
 <body>
@@ -112,21 +137,14 @@
     <audio id="scream" src="https://www.myinstants.com/media/sounds/scream.mp3" preload="auto"></audio>
   </div>
 
+  <div id="explosion">
+    <img src="explosion.gif" alt="Explosion">
+    <audio id="boom" src="https://www.myinstants.com/media/sounds/explosion.mp3" preload="auto"></audio>
+  </div>
+
   <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/minecraft-pop.mp3" preload="auto"></audio>
   <audio id="eatSound" src="https://www.myinstants.com/media/sounds/minecraft_eat.mp3" preload="auto"></audio>
   <audio id="reminderSound" src="eat-some-corndogs.mp3" preload="auto"></audio>
-
-  <!-- Add milestone voice lines -->
-  <audio id="milestone-10" src="wow-10.mp3" preload="auto"></audio>
-  <audio id="milestone-20" src="wow-20.mp3" preload="auto"></audio>
-  <audio id="milestone-30" src="wow-30.mp3" preload="auto"></audio>
-  <audio id="milestone-40" src="wow-40.mp3" preload="auto"></audio>
-  <audio id="milestone-50" src="wow-50.mp3" preload="auto"></audio>
-  <audio id="milestone-60" src="wow-60.mp3" preload="auto"></audio>
-  <audio id="milestone-70" src="wow-70.mp3" preload="auto"></audio>
-  <audio id="milestone-80" src="wow-80.mp3" preload="auto"></audio>
-  <audio id="milestone-90" src="wow-90.mp3" preload="auto"></audio>
-  <audio id="milestone-100" src="wow-100.mp3" preload="auto"></audio>
 
   <script>
     let count = 0;
@@ -137,20 +155,17 @@
     const spawnSound = document.getElementById('spawnSound');
     const eatSound = document.getElementById('eatSound');
     const reminderSound = document.getElementById('reminderSound');
+    const explosion = document.getElementById('explosion');
+    const boom = document.getElementById('boom');
     let lastClickTime = Date.now();
 
-    const milestoneLines = {
-      10: document.getElementById('milestone-10'),
-      20: document.getElementById('milestone-20'),
-      30: document.getElementById('milestone-30'),
-      40: document.getElementById('milestone-40'),
-      50: document.getElementById('milestone-50'),
-      60: document.getElementById('milestone-60'),
-      70: document.getElementById('milestone-70'),
-      80: document.getElementById('milestone-80'),
-      90: document.getElementById('milestone-90'),
-      100: document.getElementById('milestone-100'),
-    };
+    function speakMilestone(count) {
+      const msg = new SpeechSynthesisUtterance(`Wow. I can't believe you ate ${count} corn dogs.`);
+      msg.volume = Math.min(1, count / 100);
+      msg.pitch = 1 + ((count % 100) / 200);
+      msg.rate = 1;
+      window.speechSynthesis.speak(msg);
+    }
 
     function spawnCornDog() {
       const corndog = document.createElement('div');
@@ -171,9 +186,8 @@
         lastClickTime = Date.now();
         corndog.remove();
 
-        if (milestoneLines[count]) {
-          milestoneLines[count].currentTime = 0;
-          milestoneLines[count].play();
+        if (count % 10 === 0) {
+          speakMilestone(count);
         }
 
         if (count % 100 === 0) {
@@ -184,6 +198,18 @@
             jumpscare.style.display = 'none';
           }, 4000);
         }
+
+        if (count === 500) {
+          explosion.style.display = 'flex';
+          boom.currentTime = 0;
+          boom.play();
+          document.body.style.animation = 'shake 0.3s infinite';
+
+          setTimeout(() => {
+            explosion.style.display = 'none';
+            document.body.style.animation = '';
+          }, 5000);
+        }
       });
 
       setTimeout(() => {
@@ -193,16 +219,14 @@
 
     setInterval(spawnCornDog, 1200);
 
-    // Inactivity check every second
     setInterval(() => {
       if (Date.now() - lastClickTime > 10000) {
         reminderSound.currentTime = 0;
         reminderSound.play();
-        lastClickTime = Date.now(); // reset timer to not spam
+        lastClickTime = Date.now();
       }
     }, 1000);
 
-    // Fake notifications
     const names = [
       "FAKEAXIS", "Krabs", "Flanker", "Mechanic", "Adamizer8Pro", "Agro",
       "Pirovideo", "the identity o...", "TremblingAspe...", "Loimology",
