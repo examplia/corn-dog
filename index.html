@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Corn Dog Reaper</title>
+  <title>Corn Dog Clicker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="🌭">
   <script type="module">
-    // Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyChqD_9j3np8jnrM4BXDnhrRl4r52TamZk",
       authDomain: "corn-dog-clicker.firebaseapp.com",
@@ -21,162 +21,95 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Auto-generate user ID
-    let userId = localStorage.getItem("user_id");
+    // Unique ID per browser (stored in localStorage)
+    let userId = localStorage.getItem("corndog_uid");
     if (!userId) {
-      userId = "user_" + crypto.randomUUID();
-      localStorage.setItem("user_id", userId);
+      userId = crypto.randomUUID();
+      localStorage.setItem("corndog_uid", userId);
     }
 
-    // Game logic
+    const counterElem = document.getElementById("counter");
     let count = 0;
-    let lastClickTime = Date.now();
-    const counter = document.getElementById("counter");
-    const spawnSound = document.getElementById("spawnSound");
-    const eatSound = document.getElementById("eatSound");
-    const reminderSound = document.getElementById("reminderSound");
-    const jumpscare = document.getElementById("jumpscare");
-    const scream = document.getElementById("scream");
-    const explosion = document.getElementById("explosion");
-    const boom = document.getElementById("boom");
-    const notifContainer = document.getElementById("notif-container");
 
-    async function loadProgress() {
-      try {
-        const docRef = doc(db, "players", userId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          count = docSnap.data().count || 0;
-        }
-        counter.textContent = `Corn Dogs Eaten: ${count}`;
-      } catch (e) {
-        console.warn("Failed to load Firebase save. Using fallback.");
-        count = parseInt(localStorage.getItem("corndog_count")) || 0;
-        counter.textContent = `Corn Dogs Eaten: ${count}`;
+    async function loadData() {
+      const docRef = doc(db, "users", userId);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        count = snap.data().count || 0;
+        counterElem.textContent = `Corn Dogs Eaten: ${count}`;
       }
     }
 
-    async function saveProgress() {
-      try {
-        await setDoc(doc(db, "players", userId), { count });
-      } catch (e) {
-        localStorage.setItem("corndog_count", count);
-      }
+    async function saveData() {
+      await setDoc(doc(db, "users", userId), { count });
     }
 
-    function spawnCornDog() {
-      const corndog = document.createElement('div');
-      corndog.className = 'corndog';
-      corndog.textContent = '🌭';
-      corndog.style.top = Math.random() * (window.innerHeight - 50) + 'px';
-      corndog.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+    window.spawnCornDog = function() {
+      const corndog = document.createElement("div");
+      corndog.className = "corndog";
+      corndog.textContent = "🌭";
+      corndog.style.top = Math.random() * (window.innerHeight - 50) + "px";
+      corndog.style.left = Math.random() * (window.innerWidth - 50) + "px";
       document.body.appendChild(corndog);
 
+      const spawnSound = document.getElementById("spawnSound");
       spawnSound.currentTime = 0;
       spawnSound.play();
 
-      corndog.addEventListener('click', async () => {
+      corndog.addEventListener("click", async () => {
         count++;
-        counter.textContent = `Corn Dogs Eaten: ${count}`;
-        eatSound.currentTime = 0;
-        eatSound.play();
-        lastClickTime = Date.now();
+        counterElem.textContent = `Corn Dogs Eaten: ${count}`;
+        document.getElementById("eatSound").play();
         corndog.remove();
-        await saveProgress();
-
-        if (count % 100 === 0) {
-          jumpscare.style.display = 'flex';
-          scream.currentTime = 0;
-          scream.play();
-          setTimeout(() => { jumpscare.style.display = 'none'; }, 4000);
-        }
-
-        if (count === 500) {
-          explosion.style.display = 'flex';
-          boom.currentTime = 0;
-          boom.play();
-          document.body.style.animation = 'shake 0.3s infinite';
-          setTimeout(() => {
-            explosion.style.display = 'none';
-            document.body.style.animation = '';
-          }, 5000);
-        }
+        await saveData();
       });
 
       setTimeout(() => {
         if (document.body.contains(corndog)) corndog.remove();
       }, 8000);
-    }
+    };
 
-    setInterval(spawnCornDog, 1200);
-
-    setInterval(() => {
-      if (Date.now() - lastClickTime > 10000) {
-        reminderSound.currentTime = 0;
-        reminderSound.play();
-        lastClickTime = Date.now();
-      }
-    }, 1000);
-
-    const names = [
-      "FAKEAXIS", "Krabs", "Flanker", "Mechanic", "Adamizer8Pro", "Agro",
-      "Pirovideo", "the identity o...", "TremblingAspe...", "Loimology",
-      "Neuroii", "Onionsu", "blox", "Blockhead.exe", "oxxywozz",
-      "alyssa", "ame", "DocSlay", "Gary", "not a mod",
-      "snkerpickles", "Alixiiann", "ConeDealer", "drainfun",
-      "Fishy! | Doct...", "GrubFub9", "Hatty", "ian mcg...",
-      "Invest in Azer...", "John Co...", "kris", "Lag", "Lil27N1sh",
-      "oxywyozz", "Ronn \"Underscore\""
-    ];
-
-    setInterval(() => {
-      const notif = document.createElement('div');
-      notif.className = 'notif';
-      const name = names[Math.floor(Math.random() * names.length)];
-      const score = Math.floor(Math.random() * 500) + 50;
-      notif.textContent = `${name} just ate ${score} corn dogs! 🌭`;
-      notifContainer.appendChild(notif);
-      setTimeout(() => notif.remove(), 6000);
-    }, 2500);
-
-    window.addEventListener("DOMContentLoaded", loadProgress);
+    window.onload = async () => {
+      await loadData();
+      setInterval(window.spawnCornDog, 1200);
+    };
   </script>
-
   <style>
-    /* [Same CSS from before — keep unchanged] */
-    body { margin: 0; background: #000; color: white; font-family: Impact; text-align: center; overflow: hidden; }
-    h1 { font-size: 3rem; margin-top: 2rem; }
-    .gif { max-width: 90%; height: auto; border: 5px solid #ff9900; margin: 1rem auto; box-shadow: 0 0 20px #ff9900; }
-    #counter { font-size: 2rem; margin-top: 0.5rem; color: #ffcc00; }
-    .corndog { position: absolute; font-size: 2rem; cursor: pointer; user-select: none; z-index: 10; transition: transform 0.2s ease; }
-    .corndog:hover { transform: scale(1.3); }
-    #notif-container { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 1000; }
-    .notif { background: rgba(255,255,255,0.1); color: white; padding: 10px 15px; font-size: 1.1rem; border-left: 4px solid #ffcc00; border-radius: 6px; animation: fadeInOut 6s ease-in-out forwards; }
-    @keyframes fadeInOut { 0% {opacity: 0; transform: translateY(20px);} 10% {opacity: 1; transform: translateY(0);} 90% {opacity: 1;} 100% {opacity: 0; transform: translateY(20px);} }
-    #jumpscare, #explosion { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100vw; height: 100vh; background-color: black; justify-content: center; align-items: center; }
-    #jumpscare img, #explosion img { max-width: 100%; max-height: 100%; }
-    @keyframes shake { 0%, 100% {transform: translate(0,0);} 25% {transform: translate(-10px,5px);} 50% {transform: translate(10px,-5px);} 75% {transform: translate(-5px,10px);} }
+    body {
+      margin: 0;
+      background: #000;
+      color: white;
+      font-family: Impact, Haettenschweiler, 'Arial Black', sans-serif;
+      text-align: center;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-top: 2rem;
+    }
+    #counter {
+      font-size: 2rem;
+      margin-top: 0.5rem;
+      color: #ffcc00;
+    }
+    .corndog {
+      position: absolute;
+      font-size: 2rem;
+      cursor: pointer;
+      user-select: none;
+      z-index: 10;
+      transition: transform 0.2s ease;
+    }
+    .corndog:hover {
+      transform: scale(1.3);
+    }
   </style>
 </head>
 <body>
   <h1>Today I Will Eat Five Corn Dogs</h1>
-  <img src="corn-dog-reaper.gif" class="gif" alt="Corn Dog Reaper">
   <div id="counter">Corn Dogs Eaten: 0</div>
-
-  <div id="notif-container"></div>
-
-  <div id="jumpscare">
-    <img src="tenor.gif" alt="Jumpscare">
-    <audio id="scream" src="https://www.myinstants.com/media/sounds/scream.mp3" preload="auto"></audio>
-  </div>
-
-  <div id="explosion">
-    <img src="explosion.gif" alt="Explosion">
-    <audio id="boom" src="https://www.myinstants.com/media/sounds/explosion.mp3" preload="auto"></audio>
-  </div>
 
   <audio id="spawnSound" src="https://www.myinstants.com/media/sounds/minecraft-pop.mp3" preload="auto"></audio>
   <audio id="eatSound" src="https://www.myinstants.com/media/sounds/minecraft_eat.mp3" preload="auto"></audio>
-  <audio id="reminderSound" src="eat-some-corndogs.mp3" preload="auto"></audio>
 </body>
 </html>
