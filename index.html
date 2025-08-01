@@ -1,4 +1,100 @@
-<!DOCTYPE html>
+.achievement-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border: 2px solid #ffcc00;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      animation: achievementSlide 4s ease-in-out forwards;
+      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.4);
+      max-width: 300px;
+    }
+    
+    @keyframes achievementSlide {
+      0% { transform: translateX(100%); opacity: 0; }
+      10% { transform: translateX(0); opacity: 1; }
+      90% { transform: translateX(0); opacity: 1; }
+      100% { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .achievement-icon {
+      font-size: 2rem;
+      color: #000;
+    }
+    
+    .achievement-content {
+      flex: 1;
+      color: #000;
+    }
+    
+    .achievement-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .achievement-reward {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    .achievements-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    
+    .achievement-category {
+      margin-bottom: 20px;
+    }
+    
+    .achievement-category h4 {
+      color: #ffcc00;
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      border-bottom: 1px solid rgba(255, 204, 0, 0.3);
+      padding-bottom: 5px;
+    }
+    
+    .achievement {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    
+    .achievement:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .achievement.unlocked {
+      background: rgba(255, 204, 0, 0.15);
+      border-color: rgba(255, 204, 0, 0.3);
+    }
+    
+    .achievement-info {
+      margin-bottom: 8px;
+    }
+    
+    .achievement-name {
+      font-weight: bold;
+      color: #fff;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    
+    .achievement.unlocked .achievement-name {
+      color: #ffcc00;
+    }
+    
+    .achievement-desc {
+      font-size: 0.8rem;<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -442,28 +538,38 @@
       
       const ACHIEVEMENTS = {
         clicks: [
-          { id: 'click1', name: '100 Clicks', req: 100, reward: 50 },
-          { id: 'click2', name: '1,000 Clicks', req: 1000, reward: 500 },
-          { id: 'click3', name: '10,000 Clicks', req: 10000, reward: 5000 },
-          { id: 'click4', name: '100,000 Clicks', req: 100000, reward: 50000 },
-          { id: 'click5', name: '1,000,000 Clicks', req: 1000000, reward: 500000 }
+          { id: 'click1', name: 'Getting Started', req: 10, reward: 25 },
+          { id: 'click2', name: 'Click Enthusiast', req: 100, reward: 100 },
+          { id: 'click3', name: 'Click Master', req: 1000, reward: 1000 },
+          { id: 'click4', name: 'Click Legend', req: 10000, reward: 10000 },
+          { id: 'click5', name: 'Click God', req: 100000, reward: 100000 },
+          { id: 'click6', name: 'Ultimate Clicker', req: 1000000, reward: 1000000 }
         ],
         corndogs: [
-          { id: 'dogs1', name: 'Corn Dog Novice', req: 1000, reward: 100 },
-          { id: 'dogs2', name: 'Corn Dog Expert', req: 10000, reward: 1000 },
-          { id: 'dogs3', name: 'Corn Dog Master', req: 100000, reward: 10000 },
-          { id: 'dogs4', name: 'Corn Dog Legend', req: 1000000, reward: 100000 },
-          { id: 'dogs5', name: 'Corn Dog God', req: 10000000, reward: 1000000 }
+          { id: 'dogs1', name: 'First Bite', req: 50, reward: 50 },
+          { id: 'dogs2', name: 'Corn Dog Novice', req: 500, reward: 500 },
+          { id: 'dogs3', name: 'Corn Dog Expert', req: 5000, reward: 5000 },
+          { id: 'dogs4', name: 'Corn Dog Master', req: 50000, reward: 50000 },
+          { id: 'dogs5', name: 'Corn Dog Legend', req: 500000, reward: 500000 },
+          { id: 'dogs6', name: 'Corn Dog God', req: 5000000, reward: 5000000 }
         ],
         bosses: [
-          { id: 'boss1', name: 'Boss Slayer', req: 1, reward: 1000 },
-          { id: 'boss2', name: 'Boss Hunter', req: 5, reward: 5000 },
-          { id: 'boss3', name: 'Boss Master', req: 10, reward: 10000 }
+          { id: 'boss1', name: 'Boss Slayer', req: 1, reward: 2000 },
+          { id: 'boss2', name: 'Boss Hunter', req: 5, reward: 10000 },
+          { id: 'boss3', name: 'Boss Master', req: 25, reward: 50000 },
+          { id: 'boss4', name: 'Boss Destroyer', req: 100, reward: 250000 }
         ],
         golden: [
-          { id: 'golden1', name: 'Lucky!', req: 1, reward: 1000 },
-          { id: 'golden2', name: 'Fortune Favored', req: 5, reward: 5000 },
-          { id: 'golden3', name: 'Golden God', req: 10, reward: 10000 }
+          { id: 'golden1', name: 'Lucky Find', req: 1, reward: 1000 },
+          { id: 'golden2', name: 'Golden Hunter', req: 10, reward: 10000 },
+          { id: 'golden3', name: 'Golden Master', req: 50, reward: 50000 },
+          { id: 'golden4', name: 'Golden God', req: 100, reward: 100000 }
+        ],
+        special: [
+          { id: 'speed1', name: 'Speed Demon', req: 100, reward: 5000, desc: 'Get a 100x combo' },
+          { id: 'rich1', name: 'Millionaire', req: 1000000, reward: 25000, desc: 'Earn $1,000,000' },
+          { id: 'prestige1', name: 'Ascension', req: 1, reward: 100000, desc: 'Prestige once' },
+          { id: 'time1', name: 'Dedicated Player', req: 3600, reward: 15000, desc: 'Play for 1 hour' }
         ]
       };
       
@@ -502,24 +608,33 @@
       };
 
       async function saveData() {
-        const username = auth.currentUser.email.split('@')[0];
-        await setDoc(doc(db, "users", userId), {
-          count: count || 0,
-          money: money || 0,
-          multiplier: multiplier || 1,
-          autoClickers: autoClickers || 0,
-          upgradeLevel: upgradeLevel || 1,
-          passiveIncome: passiveIncome || 0,
-          prestigeLevel: prestigeLevel || 0,
+        if (!userId) return;
+        
+        const username = auth.currentUser?.email?.split('@')[0] || 'Unknown';
+        const dataToSave = {
+          count: Math.floor(count) || 0,
+          money: Math.floor(money) || 0,
+          multiplier: Math.floor(multiplier) || 1,
+          autoClickers: Math.floor(autoClickers) || 0,
+          upgradeLevel: Math.floor(upgradeLevel) || 1,
+          passiveIncome: Math.floor(passiveIncome) || 0,
+          prestigeLevel: Math.floor(prestigeLevel) || 0,
           achievements: achievements || {},
-          username: username || 'Unknown',
-          totalClicks: totalClicks || 0,
-          maxCombo: maxCombo || 0,
-          goldenCornDogsFound: goldenCornDogsFound || 0,
-          bossKills: bossKills || 0,
-          lastUpdated: new Date().getTime()
-        });
-        updateLeaderboard();
+          username: username,
+          totalClicks: Math.floor(totalClicks) || 0,
+          maxCombo: Math.floor(maxCombo) || 0,
+          goldenCornDogsFound: Math.floor(goldenCornDogsFound) || 0,
+          bossKills: Math.floor(bossKills) || 0,
+          timePlayedSeconds: Math.floor(timePlayedSeconds) || 0,
+          lastUpdated: Date.now()
+        };
+        
+        try {
+          await setDoc(doc(db, "users", userId), dataToSave);
+          updateLeaderboard();
+        } catch (error) {
+          console.error('Save error:', error);
+        }
       }
       
       async function updateLeaderboard() {
@@ -540,22 +655,40 @@
             <div class="leaderboard-entries">
           `;
           
-          snapshot.forEach((doc, index) => {
+          let rank = 1;
+          snapshot.forEach((doc) => {
             const data = doc.data();
             const isCurrentUser = doc.id === userId;
             
-            // Fix NaN issues by ensuring all values are valid numbers
-            const displayCount = (data.count && !isNaN(data.count)) ? numberFormat(data.count) : '0';
-            const displayUsername = data.username || 'Unknown Player';
+            // Strict validation to prevent NaN
+            const rawCount = data.count;
+            const rawUsername = data.username;
+            
+            // Skip entries with invalid data
+            if (rawCount === null || rawCount === undefined || isNaN(rawCount) || rawCount < 0) {
+              return;
+            }
+            
+            if (!rawUsername || typeof rawUsername !== 'string' || rawUsername.trim() === '') {
+              return;
+            }
+            
+            const displayCount = numberFormat(Math.floor(rawCount));
+            const displayUsername = rawUsername.trim().substring(0, 15); // Limit length
             
             leaderboardHTML += `
               <div class="leaderboard-entry ${isCurrentUser ? 'current-user' : ''}">
-                <span class="rank">#${index + 1}</span>
+                <span class="rank">#${rank}</span>
                 <span class="username">${displayUsername}</span>
                 <span class="score">${displayCount} 🌭</span>
               </div>
             `;
+            rank++;
           });
+          
+          if (rank === 1) {
+            leaderboardHTML += `<div class="leaderboard-empty">No valid scores yet!</div>`;
+          }
           
           leaderboardHTML += `</div>`;
           leaderboardElem.innerHTML = leaderboardHTML;
@@ -640,6 +773,7 @@
       }
 
       function checkAchievements() {
+        // Check all achievement categories
         ACHIEVEMENTS.clicks.forEach(ach => {
           if (!achievements[ach.id] && totalClicks >= ach.req) {
             unlockAchievement(ach);
@@ -663,6 +797,31 @@
             unlockAchievement(ach);
           }
         });
+
+        // Check special achievements
+        if (ACHIEVEMENTS.special) {
+          ACHIEVEMENTS.special.forEach(ach => {
+            let shouldUnlock = false;
+            switch(ach.id) {
+              case 'speed1':
+                shouldUnlock = maxCombo >= 100;
+                break;
+              case 'rich1':
+                shouldUnlock = money >= 1000000;
+                break;
+              case 'prestige1':
+                shouldUnlock = prestigeLevel >= 1;
+                break;
+              case 'time1':
+                shouldUnlock = timePlayedSeconds >= 3600;
+                break;
+            }
+            
+            if (!achievements[ach.id] && shouldUnlock) {
+              unlockAchievement(ach);
+            }
+          });
+        }
       }
 
       function unlockAchievement(ach) {
@@ -799,6 +958,53 @@
             document.getElementById(btn.dataset.tab).classList.add('active');
           });
         });
+
+        // Setup panel toggle buttons
+        const setupPanelToggle = (buttonId, panelId) => {
+          const button = document.getElementById(buttonId);
+          const panel = document.getElementById(panelId);
+          if (button && panel) {
+            button.addEventListener('click', () => {
+              panel.classList.toggle('panel-hidden');
+              const isHidden = panel.classList.contains('panel-hidden');
+              button.innerHTML = isHidden ? '👁️' : '❌';
+              button.title = isHidden ? `Show ${panelId}` : `Hide ${panelId}`;
+            });
+          }
+        };
+
+        setupPanelToggle('toggle-shop', 'shop');
+        setupPanelToggle('toggle-leaderboard', 'leaderboard');
+        setupPanelToggle('toggle-stats', 'stats-container');
+
+        // Setup master hide/show button
+        const masterToggle = document.getElementById('master-toggle');
+        if (masterToggle) {
+          masterToggle.addEventListener('click', () => {
+            const panels = ['shop', 'leaderboard', 'stats-container'];
+            const allHidden = panels.every(id => document.getElementById(id).classList.contains('panel-hidden'));
+            
+            panels.forEach(id => {
+              const panel = document.getElementById(id);
+              const toggle = document.getElementById(`toggle-${id.replace('-container', '-stats')}`);
+              if (allHidden) {
+                panel.classList.remove('panel-hidden');
+                if (toggle) {
+                  toggle.innerHTML = '❌';
+                  toggle.title = `Hide ${id}`;
+                }
+              } else {
+                panel.classList.add('panel-hidden');
+                if (toggle) {
+                  toggle.innerHTML = '👁️';
+                  toggle.title = `Show ${id}`;
+                }
+              }
+            });
+            
+            masterToggle.innerHTML = allHidden ? '🙈 Hide All' : '👀 Show All';
+          });
+        }
 
         // Initialize game state if user is already logged in
         const currentUser = auth.currentUser;
@@ -1327,6 +1533,59 @@
       100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
     }
     
+    .panel-hidden {
+      display: none !important;
+    }
+    
+    .toggle-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid #ffcc00;
+      color: #ffcc00;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: all 0.2s;
+    }
+    
+    .toggle-button:hover {
+      background: rgba(255, 204, 0, 0.2);
+      transform: scale(1.1);
+    }
+    
+    .master-toggle {
+      position: fixed;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #ffcc00;
+      color: #ffcc00;
+      padding: 10px 15px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      z-index: 1000;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    
+    .master-toggle:hover {
+      background: rgba(255, 204, 0, 0.1);
+      transform: translateY(-50%) scale(1.05);
+    }
+    
     /* Mobile responsiveness */
     @media (max-width: 768px) {
       #shop {
@@ -1353,6 +1612,7 @@
       .stats-container {
         margin: 10px;
         gap: 10px;
+        position: relative;
       }
       
       .prestige-button {
@@ -1367,6 +1627,23 @@
       
       .boss {
         max-width: 90vw;
+      }
+      
+      .master-toggle {
+        writing-mode: horizontal-tb;
+        text-orientation: mixed;
+        top: auto;
+        bottom: 10px;
+        right: 10px;
+        transform: none;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+      
+      .toggle-button {
+        width: 25px;
+        height: 25px;
+        font-size: 0.7rem;
       }
     }
     
@@ -1409,7 +1686,8 @@
   <div id="gameContent" style="display: none;">
     <h1>Today I Will Eat Five Corn Dogs</h1>
     
-    <div class="stats-container">
+    <div class="stats-container" id="stats-container">
+      <button class="toggle-button" id="toggle-stats" title="Hide stats">❌</button>
       <div class="main-stats">
         <h3>📊 Main Stats</h3>
         <div class="stat-item">
@@ -1454,6 +1732,7 @@
     <img src="corn-dog-reaper.gif" id="reaper" alt="Corn Dog Reaper">
     
     <div id="shop">
+      <button class="toggle-button" id="toggle-shop" title="Hide shop">❌</button>
       <div class="shop-tabs">
         <button class="tab-btn active" data-tab="upgrades">🛒 Shop</button>
         <button class="tab-btn" data-tab="achievements">🏆 Awards</button>
@@ -1475,7 +1754,11 @@
       </div>
     </div>
 
-    <div id="leaderboard"></div>
+    <div id="leaderboard">
+      <button class="toggle-button" id="toggle-leaderboard" title="Hide leaderboard">❌</button>
+    </div>
+
+    <button class="master-toggle" id="master-toggle">👀 Show All</button>
 
     <button id="prestige-btn" class="prestige-button">
       <div class="prestige-content">
